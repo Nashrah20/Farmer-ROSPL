@@ -1,0 +1,42 @@
+{
+  "feature_columns": [
+    "soil_moisture",
+    "temperature",
+    "humidity",
+    "rainfall",
+    "nitrogen",
+    "phosphorus",
+    "potassium",
+    "ph",
+    "ec",
+    "ndvi",
+    "leaf_health",
+    "stress_level",
+    "wind_speed",
+    "npk_ratio",
+    "moisture_temp_index",
+    "health_stress_ratio",
+    "hour",
+    "day_of_week",
+    "month",
+    "is_summer",
+    "is_monsoon"
+  ],
+  "n_features": 21,
+  "trained_at": "2026-01-22T22:17:11.935073",
+  "training_samples": 34560,
+  "model_type": "RandomForestRegressor",
+  "metrics": {
+    "train_mae": 1.3664279357672524,
+    "test_mae": 1.7298444942468363,
+    "train_r2": 0.869029938930249,
+    "test_r2": 0.777812483402526,
+    "cv_mean": 0.7526592033722457,
+    "cv_std": 0.008854755795948657
+  },
+  "reward_system": {
+    "enabled": true,
+    "mean_reward": 29.30358796296296,
+    "positive_ratio": 0.9622415975249613
+  }
+}
