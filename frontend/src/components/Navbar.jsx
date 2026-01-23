@@ -222,40 +222,7 @@ const Navbar = () => {
             onClick={() => setMobileMenuOpen(false)}
           />
           <aside className="lg:hidden fixed left-0 top-0 h-screen w-80 bg-gradient-to-b from-amber-800 via-yellow-800 to-amber-900 text-white shadow-2xl z-50 flex flex-col animate-slide-in">
-            {/{/* Backend Status - Mobile */}
-              <button
-                onClick={checkBackendStatus}
-                disabled={isChecking}
-                className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-all w-full ${
-                  backendStatus.isLive 
-                    ? 'bg-green-500/20 hover:bg-green-500/30 text-green-100' 
-                    : 'bg-red-500/20 hover:bg-red-500/30 text-red-100'
-                }`}
-              >
-                <div className="relative flex items-center">
-                  <div className={`w-2.5 h-2.5 rounded-full ${backendStatus.isLive ? 'bg-green-400' : 'bg-red-400'}`}>
-                    {backendStatus.isLive && (
-                      <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-green-400 animate-ping opacity-75"></div>
-                    )}
-                  </div>
-                </div>
-                <div className="flex-1 text-left">
-                  <span className="font-medium text-sm block">
-                    {backendStatus.isLive ? 'Backend Live' : 'Backend Offline'}
-                  </span>
-                  {backendStatus.isLive && backendStatus.responseTime && (
-                    <span className="text-xs opacity-75">Response: {backendStatus.responseTime}ms</span>
-                  )}
-                </div>
-                {isChecking && (
-                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                )}
-              </button>
-
-              * Logo */}
+            {/* Logo */}
             <div className="p-6 border-b border-white/10">
               <Link to="/" className="flex items-center space-x-3" onClick={() => setMobileMenuOpen(false)}>
                 <div className="bg-white/20 p-2 rounded-lg">
@@ -293,6 +260,39 @@ const Navbar = () => {
 
             {/* Bottom Section */}
             <div className="p-4 border-t border-white/10 space-y-3">
+              {/* Backend Status - Mobile */}
+              <button
+                onClick={checkBackendStatus}
+                disabled={isChecking}
+                className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-all w-full ${
+                  backendStatus.isLive 
+                    ? 'bg-green-500/20 hover:bg-green-500/30 text-green-100' 
+                    : 'bg-red-500/20 hover:bg-red-500/30 text-red-100'
+                }`}
+              >
+                <div className="relative flex items-center">
+                  <div className={`w-2.5 h-2.5 rounded-full ${backendStatus.isLive ? 'bg-green-400' : 'bg-red-400'}`}>
+                    {backendStatus.isLive && (
+                      <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-green-400 animate-ping opacity-75"></div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex-1 text-left">
+                  <span className="font-medium text-sm block">
+                    {backendStatus.isLive ? 'Backend Live' : 'Backend Offline'}
+                  </span>
+                  {backendStatus.isLive && backendStatus.responseTime && (
+                    <span className="text-xs opacity-75">Response: {backendStatus.responseTime}ms</span>
+                  )}
+                </div>
+                {isChecking && (
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
+              </button>
+
               <button
                 onClick={cycleLanguage}
                 className="flex items-center space-x-3 px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-lg transition-all w-full"
