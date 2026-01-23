@@ -411,9 +411,7 @@ const ModernDashboard = () => {
 
         {!selectedZone && (
           <div className="text-center bg-white/60 backdrop-blur-sm rounded-xl p-16 border border-amber-200 shadow-md">
-            <svg className="w-32 h-32 text-amber-700 mx-auto mb-6" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
-            </svg>
+            <img src="/pwa-192x192.png" alt="FarmAI" className="w-32 h-32 mx-auto mb-6 object-contain" />
             <h2 className="text-3xl font-bold text-amber-900 mb-4">{t.dashboard.welcomeToFarmAI}</h2>
             <p className="text-lg text-amber-700 max-w-2xl mx-auto">
               {t.dashboard.selectZonePrompt}
