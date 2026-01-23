@@ -51,10 +51,8 @@ const Navbar = () => {
       {/* Top Bar - Only for mobile and sidebar toggle */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-amber-700 via-yellow-700 to-amber-800 text-white shadow-lg z-50 flex items-center justify-between px-4">
         <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
-            </svg>
+          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center p-1">
+            <img src="/pwa-192x192.png" alt="FarmAI" className="w-full h-full object-contain" />
           </div>
           <span className="text-xl font-bold">FarmAI</span>
         </div>
@@ -83,9 +81,7 @@ const Navbar = () => {
           <div className="flex items-center justify-between">
             <Link to="/" className={`flex items-center space-x-3 ${sidebarOpen ? '' : 'justify-center w-full'}`}>
               <div className="bg-white/20 p-2 rounded-lg hover:bg-white/30 transition-all">
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
-                </svg>
+                <img src="/pwa-192x192.png" alt="FarmAI" className="w-6 h-6 object-contain" />
               </div>
               {sidebarOpen && (
                 <div>
@@ -226,9 +222,7 @@ const Navbar = () => {
             <div className="p-6 border-b border-white/10">
               <Link to="/" className="flex items-center space-x-3" onClick={() => setMobileMenuOpen(false)}>
                 <div className="bg-white/20 p-2 rounded-lg">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
-                  </svg>
+                  <img src="/pwa-192x192.png" alt="FarmAI" className="w-6 h-6 object-contain" />
                 </div>
                 <div>
                   <span className="text-xl font-bold block">FarmAI</span>

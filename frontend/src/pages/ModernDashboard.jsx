@@ -118,9 +118,7 @@ const ModernDashboard = () => {
         <div className="text-center mb-8 animate-fade-in">
           <div className="inline-block">
             <div className="flex items-center justify-center space-x-4 mb-4">
-              <svg className="w-16 h-16 text-amber-700" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
-              </svg>
+              <img src="/pwa-192x192.png" alt="FarmAI" className="w-16 h-16 object-contain" />
               <h1 className="text-4xl md:text-5xl font-black text-amber-900">
                 {t.dashboard.title}</h1>
             </div>
