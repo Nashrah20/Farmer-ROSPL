@@ -1,11 +1,11 @@
 [phases.setup]
-nixPkgs = ["python310", "pip"]
+nixPkgs = ["python310"]
 
 [phases.install]
-cmds = ["cd backend && pip install -r requirements.txt"]
+cmds = ["cd backend && python -m pip install -r requirements.txt"]
 
 [phases.build]
 cmds = ["echo 'Build complete'"]
 
 [start]
-cmd = "cd backend && gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
+cmd = "cd backend && python -m gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
