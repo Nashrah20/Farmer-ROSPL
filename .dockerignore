@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+venv/
+.venv/
+ENV/
+env/
+
+# Git
+.git
+.gitignore
+
+# Environment files
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+
+# Frontend
+frontend/
+node_modules/
+
+# Documentation
+README.md
+*.md
+
+# Test files
+test_*.py
+*_test.py
+
+# Data files
+backend/Data/
+*.csv
+
+# Images
+*.png
+*.jpg
+*.jpeg
+
+# Other
+.DS_Store
+Thumbs.db
