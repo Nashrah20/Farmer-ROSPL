@@ -2,12 +2,40 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useSidebar } from '../context/SidebarContext';
+import config from '../config';
 
 const Navbar = () => {
   const location = useLocation();
   const { sidebarOpen, setSidebarOpen } = useSidebar();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const { t, cycleLanguage, getNextLanguageName, language } = useLanguage();
+  const [backendStatus, setBackendStatus] = React.useState({ isLive: false, responseTime: null });
+  const [isChecking, setIsChecking] = React.useState(false);
+
+  const checkBackendStatus = async () => {
+    setIsChecking(true);
+    const startTime = Date.now();
+    try {
+      const response = await fetch(config.healthCheckEndpoint, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const responseTime = Date.now() - startTime;
+      setBackendStatus({
+        isLive: response.ok,
+        responseTime: response.ok ? responseTime : null
+      });
+    } catch (error) {
+      setBackendStatus({ isLive: false, responseTime: null });
+    }
+    setIsChecking(false);
+  };
+
+  React.useEffect(() => {
+    checkBackendStatus();
+    const interval = setInterval(checkBackendStatus, 30000); // Check every 30 seconds
+    return () => clearInterval(interval);
+  }, []);
   
   const navItems = [
     { path: '/', name: t.nav.dashboard, icon: '■' },
@@ -112,6 +140,44 @@ const Navbar = () => {
 
         {/* Bottom Section - Language & User */}
         <div className="p-4 border-t border-white/10 space-y-3">
+          {/* Backend Status */}
+          <button
+            onClick={checkBackendStatus}
+            disabled={isChecking}
+            className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all w-full ${
+              sidebarOpen ? 'justify-start' : 'justify-center'
+            } ${
+              backendStatus.isLive 
+                ? 'bg-green-500/20 hover:bg-green-500/30 text-green-100' 
+                : 'bg-red-500/20 hover:bg-red-500/30 text-red-100'
+            }`}
+            title={backendStatus.isLive ? `Backend is live (${backendStatus.responseTime}ms)` : 'Backend is offline'}
+          >
+            <div className="relative flex items-center">
+              <div className={`w-2 h-2 rounded-full ${backendStatus.isLive ? 'bg-green-400' : 'bg-red-400'}`}>
+                {backendStatus.isLive && (
+                  <div className="absolute inset-0 w-2 h-2 rounded-full bg-green-400 animate-ping opacity-75"></div>
+                )}
+              </div>
+            </div>
+            {sidebarOpen && (
+              <div className="flex-1 text-left">
+                <span className="text-xs font-medium">
+                  {backendStatus.isLive ? 'Backend Live' : 'Backend Offline'}
+                </span>
+                {backendStatus.isLive && backendStatus.responseTime && (
+                  <span className="text-xs opacity-75 ml-1">({backendStatus.responseTime}ms)</span>
+                )}
+              </div>
+            )}
+            {sidebarOpen && isChecking && (
+              <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
+          </button>
+
           {/* Language Button */}
           <button
             onClick={cycleLanguage}
@@ -156,7 +222,40 @@ const Navbar = () => {
             onClick={() => setMobileMenuOpen(false)}
           />
           <aside className="lg:hidden fixed left-0 top-0 h-screen w-80 bg-gradient-to-b from-amber-800 via-yellow-800 to-amber-900 text-white shadow-2xl z-50 flex flex-col animate-slide-in">
-            {/* Logo */}
+            {/{/* Backend Status - Mobile */}
+              <button
+                onClick={checkBackendStatus}
+                disabled={isChecking}
+                className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-all w-full ${
+                  backendStatus.isLive 
+                    ? 'bg-green-500/20 hover:bg-green-500/30 text-green-100' 
+                    : 'bg-red-500/20 hover:bg-red-500/30 text-red-100'
+                }`}
+              >
+                <div className="relative flex items-center">
+                  <div className={`w-2.5 h-2.5 rounded-full ${backendStatus.isLive ? 'bg-green-400' : 'bg-red-400'}`}>
+                    {backendStatus.isLive && (
+                      <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-green-400 animate-ping opacity-75"></div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex-1 text-left">
+                  <span className="font-medium text-sm block">
+                    {backendStatus.isLive ? 'Backend Live' : 'Backend Offline'}
+                  </span>
+                  {backendStatus.isLive && backendStatus.responseTime && (
+                    <span className="text-xs opacity-75">Response: {backendStatus.responseTime}ms</span>
+                  )}
+                </div>
+                {isChecking && (
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
+              </button>
+
+              * Logo */}
             <div className="p-6 border-b border-white/10">
               <Link to="/" className="flex items-center space-x-3" onClick={() => setMobileMenuOpen(false)}>
                 <div className="bg-white/20 p-2 rounded-lg">
