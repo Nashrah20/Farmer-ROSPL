@@ -12,6 +12,33 @@ import Sensors from './pages/Sensors'
 import ImageAnalysis from './pages/ImageAnalysis'
 import './index.css'
 
+// Register Service Worker (only in production build)
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then(registration => {
+        console.log('✅ PWA Service Worker registered:', registration);
+        
+        // Check for updates
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('🔄 New PWA version available! Refresh to update.');
+              // Auto-reload after 3 seconds
+              setTimeout(() => {
+                window.location.reload();
+              }, 3000);
+            }
+          });
+        });
+      })
+      .catch(error => {
+        console.error('❌ PWA Service Worker registration failed:', error);
+      });
+  });
+}
+
 const AppContent = () => {
   const { sidebarOpen } = useSidebar();
   
