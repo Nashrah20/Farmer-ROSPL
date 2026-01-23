@@ -953,10 +953,13 @@ if __name__ == '__main__':
     print(f"Port: {Config.FLASK_PORT}")
     print("="*60 + "\n")
     
+    # Get port from environment variable (for deployment) or use config
+    port = int(os.environ.get('PORT', Config.FLASK_PORT))
+    
     # Disable debug mode to avoid auto-reloader issues
     app.run(
         host='0.0.0.0',
-        port=Config.FLASK_PORT,
+        port=port,
         debug=False,
         use_reloader=False
     )

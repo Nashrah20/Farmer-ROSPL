@@ -10,3 +10,4 @@ requests==2.31.0
 Pillow==10.1.0
 google-generativeai
 scipy==1.17.0
+gunicorn==21.2.0
