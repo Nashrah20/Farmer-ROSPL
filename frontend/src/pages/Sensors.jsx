@@ -79,13 +79,17 @@ const Sensors = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-8">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen w-full bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 pt-16 lg:pt-0">
+      <div className="w-full px-4 md:px-6 lg:px-8 py-6 md:py-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            📡 {t.sensors.title}
+          <h1 className="text-4xl md:text-5xl font-bold text-amber-900 mb-2 flex items-center justify-center gap-3">
+            <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+            </svg>
+            {t.sensors.title}
           </h1>
-          <p className="text-lg text-gray-600">{t.sensors.subtitle}</p>
+          <p className="text-lg text-amber-700">{t.sensors.subtitle}</p>
           {lastUpdate && (
             <p className="text-sm text-gray-500 mt-2">
               🕐 {t.sensors.currentHourData} • {t.sensors.lastRefreshed}: {lastUpdate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}

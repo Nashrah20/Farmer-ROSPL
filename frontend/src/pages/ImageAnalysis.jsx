@@ -152,16 +152,19 @@ const ImageAnalysis = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">
-          🌱 {t.imageAnalysis.title}
+    <div className="min-h-screen w-full bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 pt-16 lg:pt-0">
+      <div className="w-full px-4 md:px-6 lg:px-8 py-6 md:py-8">
+        <h1 className="text-3xl font-bold text-amber-900 mb-8 flex items-center gap-3">
+          <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+          </svg>
+          {t.imageAnalysis.title}
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Upload Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">{t.imageAnalysis.uploadImage}</h2>
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200 p-6">
+            <h2 className="text-xl font-semibold text-amber-900 mb-4">{t.imageAnalysis.uploadImage}</h2>
             
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
               {!imagePreview ? (
@@ -192,20 +195,20 @@ const ImageAnalysis = () => {
                   className="hidden"
                   disabled={analyzing}
                 />
-                <div className={`cursor-pointer px-4 py-2 rounded-lg transition text-center ${
-                  analyzing ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'
+                <div className={`cursor-pointer px-4 py-2 rounded-lg transition text-center font-semibold ${
+                  analyzing ? 'bg-gray-300 cursor-not-allowed text-gray-600' : 'bg-amber-600 text-white hover:bg-amber-700'
                 }`}>
-                  📷 {t.imageAnalysis.selectImage}
+                  {t.imageAnalysis.selectImage}
                 </div>
               </label>
 
               <button
                 onClick={analyzeImage}
                 disabled={!selectedImage || analyzing}
-                className={`flex-1 px-4 py-2 rounded-lg transition ${
+                className={`flex-1 px-4 py-2 rounded-lg transition font-semibold ${
                   !selectedImage || analyzing
-                    ? 'bg-gray-300 cursor-not-allowed'
-                    : 'bg-green-500 text-white hover:bg-green-600'
+                    ? 'bg-gray-300 cursor-not-allowed text-gray-600'
+                    : 'bg-green-600 text-white hover:bg-green-700'
                 }`}
               >
                 {analyzing ? (
@@ -216,35 +219,35 @@ const ImageAnalysis = () => {
                     </svg>
                     {t.imageAnalysis.analyzing}
                   </span>
-                ) : `🔍 ${t.imageAnalysis.analyze}`}
+                ) : t.imageAnalysis.analyze}
               </button>
             </div>
 
             {analyzing && (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                 <div className="flex items-center">
-                  <svg className="animate-spin h-5 w-5 text-blue-500 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-5 w-5 text-amber-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                   <div>
-                    <p className="text-blue-700 font-semibold">🧠 {t.imageAnalysis.aiAnalysisInProgress}</p>
-                    <p className="text-blue-600 text-sm">{t.imageAnalysis.usingGemini}</p>
+                    <p className="text-amber-800 font-semibold">{t.imageAnalysis.aiAnalysisInProgress}</p>
+                    <p className="text-amber-700 text-sm">{t.imageAnalysis.usingGemini}</p>
                   </div>
                 </div>
               </div>
             )}
 
             {error && (
-              <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                ❌ {error}
+              <div className="mt-4 p-3 bg-red-50 border border-red-300 text-red-800 rounded-lg font-medium">
+                {error}
               </div>
             )}
           </div>
 
           {/* Results Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">{t.imageAnalysis.analysisResults}</h2>
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200 p-6">
+            <h2 className="text-xl font-semibold text-amber-900 mb-4">{t.imageAnalysis.analysisResults}</h2>
             
             {!result ? (
               <div className="text-center text-gray-500 py-12">

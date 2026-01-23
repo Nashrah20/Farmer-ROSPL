@@ -64,22 +64,27 @@ const Analytics = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen w-full bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 pt-16 lg:pt-0">
+      <div className="w-full px-4 md:px-6 lg:px-8 py-6 md:py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">📈 {t.analytics.title}</h1>
-          <p className="text-gray-600">{t.analytics.subtitle}</p>
+          <h1 className="text-3xl font-bold text-amber-900 mb-2 flex items-center gap-3">
+            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+            </svg>
+            {t.analytics.title}
+          </h1>
+          <p className="text-amber-700">{t.analytics.subtitle}</p>
         </div>
 
         {/* Zone Selector */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200 p-6 mb-6">
+          <label className="block text-lg font-semibold text-amber-900 mb-3">
             {t.analytics.selectZone}
           </label>
           <select
             value={selectedZone}
             onChange={handleZoneChange}
-            className="w-full md:w-96 px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-500 focus:outline-none"
+            className="w-full md:w-96 px-4 py-3 border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white text-amber-900 font-medium"
           >
             <option value="">{t.analytics.selectAZone}</option>
             {zones.map((zone) => (
@@ -92,9 +97,11 @@ const Analytics = () => {
 
         {/* Charts */}
         {loading ? (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <div className="text-4xl mb-4">⏳</div>
-            <p className="text-gray-600">{t.analytics.loadingAnalytics}</p>
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200 p-12 text-center">
+            <svg className="w-16 h-16 text-amber-700 mx-auto mb-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <p className="text-amber-800 font-medium">{t.analytics.loadingAnalytics}</p>
           </div>
         ) : historyData ? (
           <div className="space-y-6">

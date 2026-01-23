@@ -9,7 +9,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f9fafb;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fcd34d 100%);
+  background-attachment: fixed;
 }
 
 code {
@@ -49,6 +50,36 @@ code {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Slide in animation for mobile sidebar */
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Fade in animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-in;
 }
 
 /* Card hover effect */

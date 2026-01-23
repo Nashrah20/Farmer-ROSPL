@@ -5,23 +5,28 @@ const Help = () => {
   const { t } = useLanguage();
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
+    <div className="min-h-screen w-full bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 pt-16 lg:pt-0">
+      <div className="w-full px-4 md:px-6 lg:px-8 py-6 md:py-8 max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-2">
-            ❓ {t.help.title}
+          <h1 className="text-4xl md:text-5xl font-bold text-amber-900 mb-2 flex items-center justify-center gap-3">
+            <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+            </svg>
+            {t.help.title}
           </h1>
-          <p className="text-lg text-gray-600">{t.help.subtitle}</p>
+          <p className="text-lg text-amber-700">{t.help.subtitle}</p>
         </div>
 
         <div className="space-y-6">
           {/* Getting Started */}
-          <div className="backdrop-blur-lg bg-white/60 rounded-2xl shadow-xl p-6 border-2 border-white/60">
-            <h2 className="text-2xl font-bold text-green-700 mb-4 flex items-center">
-              <span className="text-3xl mr-3">🚀</span>
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200 p-6">
+            <h2 className="text-2xl font-bold text-amber-900 mb-4 flex items-center gap-3">
+              <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
+              </svg>
               {t.help.gettingStarted}
             </h2>
-            <div className="space-y-3 text-gray-700">
+            <div className="space-y-3 text-amber-800">
               <p><strong>1. {t.help.step1Title}:</strong> {t.help.step1Desc}</p>
               <p><strong>2. {t.help.step2Title}:</strong> {t.help.step2Desc}</p>
               <p><strong>3. {t.help.step3Title}:</strong> {t.help.step3Desc}</p>

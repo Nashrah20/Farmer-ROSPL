@@ -93,144 +93,158 @@ const ModernDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      {/* Animated Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen w-full bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 pt-16 lg:pt-0">
+      {/* Farmer-friendly Background Pattern */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-10">
+        <div className="absolute top-0 left-0 w-full h-full" style={{
+          backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(120, 80, 40, 0.1) 35px, rgba(120, 80, 40, 0.1) 70px)`
+        }}></div>
       </div>
 
-      <div className="relative container mx-auto px-4 py-4 md:py-8">
+      <div className="relative w-full px-4 md:px-6 lg:px-8 py-6 md:py-8">
         {/* Time Display */}
-        <div className="text-center mb-6 backdrop-blur-lg bg-white/30 rounded-2xl p-4 border border-white/50 shadow-lg">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-2">
-            <span className="text-2xl">🕐</span>
-            <span className="text-lg md:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <div className="text-center mb-6 bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-amber-200 shadow-md">
+          <div className="flex items-center justify-center gap-3">
+            <svg className="w-6 h-6 text-amber-700" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            </svg>
+            <span className="text-lg font-semibold text-amber-900">
               {formatTime(currentTime)}
             </span>
           </div>
         </div>
 
         {/* Hero Section */}
-        <div className="text-center mb-8 md:mb-12 animate-fade-in">
+        <div className="text-center mb-8 animate-fade-in">
           <div className="inline-block">
-            <div className="flex items-center justify-center space-x-2 md:space-x-4 mb-4">
-              <div className="text-4xl md:text-6xl animate-bounce">🌾</div>
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-black bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
-                {t.appName}
-              </h1>
-              <div className="text-4xl md:text-6xl animate-bounce animation-delay-1000">🚀</div>
+            <div className="flex items-center justify-center space-x-4 mb-4">
+              <svg className="w-16 h-16 text-amber-700" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
+              </svg>
+              <h1 className="text-4xl md:text-5xl font-black text-amber-900">
+                {t.dashboard.title}</h1>
             </div>
-            <p className="text-base md:text-xl text-gray-600 font-semibold">{t.tagline}</p>
+            <p className="text-base md:text-lg text-amber-700 font-medium">{t.dashboard.subtitle}</p>
           </div>
         </div>
 
-        {/* Zone Selector - Glassmorphism Card */}
-        <div className="max-w-4xl mx-auto mb-6 md:mb-8 backdrop-blur-lg bg-white/30 rounded-2xl md:rounded-3xl shadow-2xl p-4 md:p-8 border border-white/50 transform hover:scale-105 transition-all duration-300">
-          <label className="block text-xl md:text-2xl font-bold text-gray-800 mb-3 md:mb-4 flex items-center">
-            <span className="text-2xl md:text-3xl mr-2 md:mr-3">🎯</span>
-            <span className="text-base md:text-2xl">{t.dashboard.selectZone}</span>
-          </label>
+        {/* Zone Selection Card */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200 p-6 mb-6">
+          <label className="block text-lg font-semibold text-amber-900 mb-3">{t.dashboard.selectZone}</label>
           <select
             value={selectedZone}
             onChange={(e) => handleZoneChange(e.target.value)}
-            className="w-full px-4 md:px-6 py-3 md:py-4 text-base md:text-lg font-semibold rounded-xl md:rounded-2xl border-2 border-purple-300 focus:border-purple-500 focus:ring-4 focus:ring-purple-200 outline-none transition-all bg-white/80 backdrop-blur"
+            className="w-full px-4 py-3 text-base border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all bg-white text-amber-900 font-medium"
           >
-            <option value="">🌍 {t.dashboard.chooseZone}</option>
+            <option value="">{t.dashboard.chooseZone}</option>
             {zones.map((zone) => (
-              <option key={zone} value={zone}>
-                {getZoneLabel(zone)}
-              </option>
+              <option key={zone} value={zone}>{getZoneLabel(zone)}</option>
             ))}
           </select>
         </div>
 
         {currentData && (
           <>
-            {/* Current Conditions - Creative Grid */}
-            <div className="mb-6 md:mb-8">
-              <h2 className="text-2xl md:text-3xl font-black text-center mb-4 md:mb-6 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            {/* Current Conditions */}
+            <div className="mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 text-amber-900">
                 {t.dashboard.liveConditions}
               </h2>
               
-              <div className="grid grid-cols-3 gap-3 md:gap-6">
-                {/* Soil Moisture - Animated Card */}
-                <div className="group relative backdrop-blur-md bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-3xl p-6 border border-white/50 shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300">
-                  <div className="absolute -top-4 -right-4 text-5xl animate-spin-slow">💧</div>
-                  <p className="text-sm font-semibold text-blue-700 mb-2">{t.dashboard.soilMoisture}</p>
-                  <p className="text-4xl font-black bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                    {formatNumber(currentData.sensor?.soil_moisture, 2)}%
-                  </p>
-                  <div className="mt-3 h-2 bg-blue-200 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-1000"
-                      style={{ width: `${currentData.sensor?.soil_moisture || 0}%` }}
-                    ></div>
-                  </div>
-                </div>
-
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {/* Temperature */}
-                <div className="group relative backdrop-blur-md bg-gradient-to-br from-orange-400/20 to-red-400/20 rounded-3xl p-6 border border-white/50 shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300">
-                  <div className="absolute -top-4 -right-4 text-5xl animate-pulse">🌡️</div>
-                  <p className="text-sm font-semibold text-orange-700 mb-2">{t.dashboard.temperature}</p>
-                  <p className="text-4xl font-black bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                <div className="group relative bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-amber-700" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="text-sm font-semibold text-amber-800 mb-1">{t.dashboard.temperature}</p>
+                  <p className="text-3xl font-bold text-amber-900">
                     {formatNumber(currentData.sensor?.temperature, 1)}°C
-                  </p>
-                  <p className="text-xs text-orange-600 mt-2 font-semibold">
-                    {currentData.sensor?.temperature > 30 ? `🔥 ${t.dashboard.hot}` : currentData.sensor?.temperature > 20 ? `😊 ${t.dashboard.perfect}` : `❄️ ${t.dashboard.cool}`}
                   </p>
                 </div>
 
                 {/* Humidity */}
-                <div className="group relative backdrop-blur-md bg-gradient-to-br from-teal-400/20 to-green-400/20 rounded-3xl p-6 border border-white/50 shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300">
-                  <div className="absolute -top-4 -right-4 text-5xl">💨</div>
-                  <p className="text-sm font-semibold text-teal-700 mb-2">{t.dashboard.humidity}</p>
-                  <p className="text-4xl font-black bg-gradient-to-r from-teal-600 to-green-600 bg-clip-text text-transparent">
+                <div className="group relative bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-blue-700" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v9A2.5 2.5 0 005.5 17h9a2.5 2.5 0 002.5-2.5v-9A2.5 2.5 0 0014.5 3h-9zM5 5.5A.5.5 0 015.5 5h9a.5.5 0 01.5.5v9a.5.5 0 01-.5.5h-9a.5.5 0 01-.5-.5v-9z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="text-sm font-semibold text-blue-800 mb-1">{t.dashboard.humidity}</p>
+                  <p className="text-3xl font-bold text-blue-900">
                     {formatNumber(currentData.sensor?.humidity, 0)}%
                   </p>
-                  <div className="mt-3 h-2 bg-teal-200 rounded-full overflow-hidden">
+                  <div className="mt-3 h-2 bg-blue-200 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-teal-500 to-green-500 rounded-full transition-all duration-1000"
+                      className="h-full bg-blue-600 rounded-full transition-all duration-1000"
                       style={{ width: `${currentData.sensor?.humidity || 0}%` }}
                     ></div>
                   </div>
                 </div>
+
+                {/* Soil Moisture */}
+                <div className="group relative bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-6 h-6 text-green-700" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="text-sm font-semibold text-green-800 mb-1">{t.dashboard.soilMoisture}</p>
+                  <p className="text-3xl font-bold text-green-900">
+                    {formatNumber(currentData.sensor?.soil_moisture, 0)}%
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* NPK Nutrients - Futuristic Cards */}
+            {/* NPK Nutrients */}
             <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center">
-                <span className="text-3xl mr-2">🧪</span>
+              <h3 className="text-2xl font-bold text-amber-900 mb-4 flex items-center justify-center gap-2">
+                <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                </svg>
                 {t.dashboard.soilNutrients}
               </h3>
-              <div className="grid grid-cols-3 gap-6">
-                <div className="backdrop-blur-md bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl p-6 border border-purple-300 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-4xl">🔵</span>
-                    <span className="text-xs font-bold text-purple-700 bg-purple-100 px-3 py-1 rounded-full">{t.dashboard.nitrogen}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md hover:shadow-lg transform hover:scale-105 transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <span className="text-xl font-bold text-purple-700">N</span>
+                    </div>
+                    <span className="text-xs font-semibold text-purple-700 bg-purple-100 px-3 py-1 rounded-full">{t.dashboard.nitrogen}</span>
                   </div>
-                  <p className="text-3xl font-black text-purple-700">{formatNumber(currentData.sensor?.nitrogen, 2)}</p>
-                  <p className="text-xs text-purple-600">mg/kg</p>
+                  <p className="text-3xl font-bold text-purple-900">{formatNumber(currentData.sensor?.nitrogen, 2)}</p>
+                  <p className="text-xs text-purple-600 mt-1">mg/kg</p>
                 </div>
 
-                <div className="backdrop-blur-md bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-300 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-4xl">🟡</span>
-                    <span className="text-xs font-bold text-yellow-700 bg-yellow-100 px-3 py-1 rounded-full">{t.dashboard.phosphorus}</span>
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md hover:shadow-lg transform hover:scale-105 transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                      <span className="text-xl font-bold text-orange-700">P</span>
+                    </div>
+                    <span className="text-xs font-semibold text-orange-700 bg-orange-100 px-3 py-1 rounded-full">{t.dashboard.phosphorus}</span>
                   </div>
-                  <p className="text-3xl font-black text-yellow-700">{formatNumber(currentData.sensor?.phosphorus, 2)}</p>
-                  <p className="text-xs text-yellow-600">mg/kg</p>
+                  <p className="text-3xl font-bold text-orange-900">{formatNumber(currentData.sensor?.phosphorus, 2)}</p>
+                  <p className="text-xs text-orange-600 mt-1">mg/kg</p>
                 </div>
 
-                <div className="backdrop-blur-md bg-gradient-to-br from-pink-500/20 to-rose-500/20 rounded-2xl p-6 border border-pink-300 shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-4xl">🟣</span>
-                    <span className="text-xs font-bold text-pink-700 bg-pink-100 px-3 py-1 rounded-full">{t.dashboard.potassium}</span>
+                <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md hover:shadow-lg transform hover:scale-105 transition-all">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
+                      <span className="text-xl font-bold text-pink-700">K</span>
+                    </div>
+                    <span className="text-xs font-semibold text-pink-700 bg-pink-100 px-3 py-1 rounded-full">{t.dashboard.potassium}</span>
                   </div>
-                  <p className="text-3xl font-black text-pink-700">{formatNumber(currentData.sensor?.potassium, 2)}</p>
-                  <p className="text-xs text-pink-600">mg/kg</p>
+                  <p className="text-3xl font-bold text-pink-900">{formatNumber(currentData.sensor?.potassium, 2)}</p>
+                  <p className="text-xs text-pink-600 mt-1">mg/kg</p>
                 </div>
               </div>
             </div>
@@ -240,82 +254,103 @@ const ModernDashboard = () => {
               <button
                 onClick={getRecommendations}
                 disabled={loading}
-                className="group relative px-12 py-6 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 text-white text-xl font-black rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-300 disabled:opacity-50"
+                className="group relative px-8 py-4 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="relative z-10 flex items-center">
+                <span className="relative z-10 flex items-center gap-2">
                   {loading ? (
                     <>
-                      <div className="animate-spin mr-3 text-3xl">⏳</div>
+                      <svg className="animate-spin w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
                       {t.dashboard.processingMagic}
                     </>
                   ) : (
                     <>
-                      <span className="text-3xl mr-3 group-hover:animate-bounce">🤖</span>
+                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+                      </svg>
                       {t.dashboard.getAIRecommendations}
-                      <span className="text-3xl ml-3 group-hover:animate-bounce">✨</span>
                     </>
                   )}
                 </span>
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur"></div>
               </button>
             </div>
 
-            {/* Predictions - Ultra Modern Cards */}
+            {/* Predictions */}
             {predictions && (
               <>
                 {/* Model Info Banner */}
                 {modelInfo && (
-                  <div className="mb-6 backdrop-blur-xl bg-gradient-to-r from-purple-600/30 to-indigo-600/30 rounded-2xl p-4 border-2 border-purple-300/50 shadow-xl">
+                  <div className="mb-6 bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-amber-200 shadow-md">
                     <div className="flex items-center justify-between flex-wrap gap-4">
                       <div className="flex items-center gap-3">
-                        <span className="text-4xl animate-pulse">🤖</span>
+                        <svg className="w-10 h-10 text-amber-700" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+                        </svg>
                         <div>
-                          <h3 className="text-xl font-black text-purple-900">{t.dashboard.aiRecommendation}</h3>
-                          <p className="text-sm text-purple-700">{t.dashboard.poweredByML}</p>
+                          <h3 className="text-lg font-bold text-amber-900">{t.dashboard.aiRecommendation}</h3>
+                          <p className="text-sm text-amber-700">{t.dashboard.poweredByML}</p>
                         </div>
                       </div>
-                      <span className="px-4 py-2 bg-purple-600 text-white rounded-full text-sm font-bold shadow-lg">
+                      <span className="px-4 py-2 bg-amber-700 text-white rounded-lg text-sm font-semibold shadow-md">
                         {modelInfo.model_used}
                       </span>
                     </div>
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-                  <div className="backdrop-blur-xl bg-gradient-to-br from-blue-500/30 to-cyan-500/30 rounded-3xl p-8 border-2 border-white/50 shadow-2xl">
-                    <div className="flex items-center mb-4">
-                      <div className="text-6xl mr-4 animate-pulse">💧</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-blue-200 shadow-md hover:shadow-lg transition-all">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg className="w-8 h-8 text-blue-700" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v9A2.5 2.5 0 005.5 17h9a2.5 2.5 0 002.5-2.5v-9A2.5 2.5 0 0014.5 3h-9zM5 5.5A.5.5 0 015.5 5h9a.5.5 0 01.5.5v9a.5.5 0 01-.5.5h-9a.5.5 0 01-.5-.5v-9z" clipRule="evenodd" />
+                        </svg>
+                      </div>
                       <div>
-                        <h3 className="text-2xl font-black text-blue-900">{t.dashboard.waterNeeded}</h3>
+                        <h3 className="text-xl font-bold text-blue-900">{t.dashboard.waterNeeded}</h3>
                         <p className="text-sm text-blue-700">{t.dashboard.irrigationRecommendation}</p>
                       </div>
                     </div>
-                    <p className="text-6xl font-black bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">
+                    <p className="text-5xl font-bold text-blue-900 mb-2">
                       {formatNumber(predictions.irrigation_liters, 0)}
                     </p>
-                    <p className="text-xl text-blue-700 font-bold">{t.dashboard.liters}</p>
+                    <p className="text-lg text-blue-700 font-semibold">{t.dashboard.liters}</p>
                   </div>
 
-                  <div className="backdrop-blur-xl bg-gradient-to-br from-green-500/30 to-emerald-500/30 rounded-3xl p-8 border-2 border-white/50 shadow-2xl">
-                    <div className="flex items-center mb-4">
-                      <div className="text-6xl mr-4">🌱</div>
+                  <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-green-200 shadow-md hover:shadow-lg transition-all">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg className="w-8 h-8 text-green-700" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
+                        </svg>
+                      </div>
                       <div>
-                        <h3 className="text-2xl font-black text-green-900">{t.dashboard.fertilizerMix}</h3>
+                        <h3 className="text-xl font-bold text-green-900">{t.dashboard.fertilizerMix}</h3>
                         <p className="text-sm text-green-700">{t.dashboard.npkRecommendation}</p>
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between bg-white/50 rounded-xl p-3">
-                        <span className="font-bold text-purple-700">🔵 N</span>
-                        <span className="text-2xl font-black text-purple-700">{formatNumber(predictions.fertilizer_N_g, 0)}g</span>
+                      <div className="flex items-center justify-between bg-purple-50 rounded-lg p-3 border border-purple-200">
+                        <span className="font-semibold text-purple-700 flex items-center gap-2">
+                          <span className="w-6 h-6 bg-purple-600 rounded text-white text-sm flex items-center justify-center">N</span>
+                          Nitrogen
+                        </span>
+                        <span className="text-2xl font-bold text-purple-900">{formatNumber(predictions.fertilizer_N_g, 0)}g</span>
                       </div>
-                      <div className="flex items-center justify-between bg-white/50 rounded-xl p-3">
-                        <span className="font-bold text-yellow-700">🟡 P</span>
-                        <span className="text-2xl font-black text-yellow-700">{formatNumber(predictions.fertilizer_P_g, 0)}g</span>
+                      <div className="flex items-center justify-between bg-orange-50 rounded-lg p-3 border border-orange-200">
+                        <span className="font-semibold text-orange-700 flex items-center gap-2">
+                          <span className="w-6 h-6 bg-orange-600 rounded text-white text-sm flex items-center justify-center">P</span>
+                          Phosphorus
+                        </span>
+                        <span className="text-2xl font-bold text-orange-900">{formatNumber(predictions.fertilizer_P_g, 0)}g</span>
                       </div>
-                      <div className="flex items-center justify-between bg-white/50 rounded-xl p-3">
-                        <span className="font-bold text-pink-700">🟣 K</span>
-                        <span className="text-2xl font-black text-pink-700">{formatNumber(predictions.fertilizer_K_g, 0)}g</span>
+                      <div className="flex items-center justify-between bg-pink-50 rounded-lg p-3 border border-pink-200">
+                        <span className="font-semibold text-pink-700 flex items-center gap-2">
+                          <span className="w-6 h-6 bg-pink-600 rounded text-white text-sm flex items-center justify-center">K</span>
+                          Potassium
+                        </span>
+                        <span className="text-2xl font-bold text-pink-900">{formatNumber(predictions.fertilizer_K_g, 0)}g</span>
                       </div>
                     </div>
                   </div>
@@ -323,11 +358,13 @@ const ModernDashboard = () => {
 
                 {/* Explanation Section */}
                 {modelInfo && modelInfo.explanation && (
-                  <div className="mb-6 backdrop-blur-xl bg-gradient-to-r from-amber-100/50 to-yellow-100/50 rounded-2xl p-6 border-2 border-amber-300/50 shadow-xl">
+                  <div className="mb-6 bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md">
                     <div className="flex items-start gap-4">
-                      <span className="text-4xl">💡</span>
+                      <svg className="w-10 h-10 text-amber-700 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+                      </svg>
                       <div>
-                        <h4 className="text-xl font-black text-amber-900 mb-2">{t.dashboard.aiExplanation}</h4>
+                        <h4 className="text-lg font-bold text-amber-900 mb-2">{t.dashboard.aiExplanation}</h4>
                         <p className="text-gray-700 leading-relaxed">{modelInfo.explanation}</p>
                       </div>
                     </div>
@@ -375,10 +412,12 @@ const ModernDashboard = () => {
         )}
 
         {!selectedZone && (
-          <div className="text-center backdrop-blur-lg bg-white/30 rounded-3xl p-16 border border-white/50">
-            <div className="text-9xl mb-6 animate-bounce">🌾</div>
-            <h2 className="text-4xl font-black text-gray-800 mb-4">{t.dashboard.welcomeToFarmAI}</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <div className="text-center bg-white/60 backdrop-blur-sm rounded-xl p-16 border border-amber-200 shadow-md">
+            <svg className="w-32 h-32 text-amber-700 mx-auto mb-6" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
+            </svg>
+            <h2 className="text-3xl font-bold text-amber-900 mb-4">{t.dashboard.welcomeToFarmAI}</h2>
+            <p className="text-lg text-amber-700 max-w-2xl mx-auto">
               {t.dashboard.selectZonePrompt}
             </p>
           </div>
