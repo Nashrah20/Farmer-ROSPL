@@ -10,7 +10,11 @@ import Recommendations from './pages/Recommendations'
 import Help from './pages/Help'
 import Sensors from './pages/Sensors'
 import ImageAnalysis from './pages/ImageAnalysis'
+import { initOfflineSystem } from './offline/init'
 import './index.css'
+
+// OFFLINE-FIRST: Initialize offline-first architecture
+initOfflineSystem();
 
 // Register Service Worker (only in production build)
 if ('serviceWorker' in navigator && import.meta.env.PROD) {

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useSidebar } from '../context/SidebarContext';
+import { useOfflineStatus } from '../hooks/useOfflineStatus';
 import config from '../config';
 
 const Navbar = () => {
@@ -11,6 +12,9 @@ const Navbar = () => {
   const { t, cycleLanguage, getNextLanguageName, language } = useLanguage();
   const [backendStatus, setBackendStatus] = React.useState({ isLive: false, responseTime: null });
   const [isChecking, setIsChecking] = React.useState(false);
+  
+  // OFFLINE-FIRST: Monitor online/offline status
+  const { isOnline, isOffline } = useOfflineStatus();
 
   const checkBackendStatus = async () => {
     setIsChecking(true);
@@ -174,6 +178,36 @@ const Navbar = () => {
             )}
           </button>
 
+          {/* OFFLINE-FIRST: Network Status Indicator */}
+          <div className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg ${
+            isOffline 
+              ? 'bg-orange-500/20 border border-orange-400/30' 
+              : 'bg-blue-500/10 border border-blue-400/20'
+          } ${!sidebarOpen ? 'justify-center' : ''}`}>
+            <div className="relative flex items-center">
+              {isOffline ? (
+                <svg className="w-5 h-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm7.707 7.707a1 1 0 00-1.414-1.414L7 11.586l-1.293-1.293a1 1 0 00-1.414 1.414L6 13.414l2.707-2.707z" clipRule="evenodd" />
+                  <path d="M4 18a1 1 0 001 1h10a1 1 0 001-1v-1H4v1z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                </svg>
+              )}
+            </div>
+            {sidebarOpen && (
+              <div className="flex-1 text-left">
+                <span className={`text-xs font-semibold ${isOffline ? 'text-orange-200' : 'text-blue-200'}`}>
+                  {isOffline ? '📴 Offline Mode' : '🌐 Online'}
+                </span>
+                <span className={`text-xs block mt-0.5 ${isOffline ? 'text-orange-300/80' : 'text-blue-300/80'}`}>
+                  {isOffline ? 'Using cached data' : 'Live data sync'}
+                </span>
+              </div>
+            )}
+          </div>
+
           {/* Language Button */}
           <button
             onClick={cycleLanguage}
@@ -286,6 +320,33 @@ const Navbar = () => {
                   </svg>
                 )}
               </button>
+
+              {/* OFFLINE-FIRST: Network Status - Mobile */}
+              <div className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg ${
+                isOffline 
+                  ? 'bg-orange-500/20 border border-orange-400/30' 
+                  : 'bg-blue-500/10 border border-blue-400/20'
+              }`}>
+                <div className="relative flex items-center">
+                  {isOffline ? (
+                    <svg className="w-5 h-5 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                    </svg>
+                  )}
+                </div>
+                <div className="flex-1 text-left">
+                  <span className={`font-medium text-sm block ${isOffline ? 'text-orange-200' : 'text-blue-200'}`}>
+                    {isOffline ? '📴 Offline Mode' : '🌐 Online'}
+                  </span>
+                  <span className={`text-xs ${isOffline ? 'text-orange-300/80' : 'text-blue-300/80'}`}>
+                    {isOffline ? 'Using cached data' : 'Live data sync'}
+                  </span>
+                </div>
+              </div>
 
               <button
                 onClick={cycleLanguage}

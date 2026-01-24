@@ -1,19 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { farmAPI } from '../api/api';
 import { useLanguage } from '../context/LanguageContext';
+import { useZones } from '../hooks/useZones';
+import { useLatestData } from '../hooks/useLatestData';
+import { savePendingAction } from '../offline/db';
+
+/**
+ * OFFLINE-FIRST DASHBOARD
+ * 
+ * This component uses custom hooks that implement offline-first data fetching:
+ * - useZones() → Loads zones from API if online, else from IndexedDB cache
+ * - useLatestData() → Loads current sensor data with automatic fallback to cache
+ * 
+ * When offline, all data is served from IndexedDB. When connection returns,
+ * data is automatically refreshed from the API.
+ */
 
 const ModernDashboard = () => {
   const { t, getZoneLabel, language } = useLanguage();
-  const [zones, setZones] = useState([]);
+  
+  // OFFLINE-FIRST: Use custom hooks instead of manual API calls
+  const { zones, loading: zonesLoading, error: zonesError, source: zonesSource } = useZones();
+  
   const [selectedZone, setSelectedZone] = useState('');
-  const [currentData, setCurrentData] = useState(null);
   const [predictions, setPredictions] = useState(null);
   const [modelInfo, setModelInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  // OFFLINE-FIRST: Load latest data for selected zone
+  const {
+    data: currentData,
+    loading: dataLoading,
+    error: dataError,
+    source: dataSource,
+    refresh: refreshData,
+  } = useLatestData(selectedZone);
+
   useEffect(() => {
-    loadZones();
     // Update time every second
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -35,27 +59,11 @@ const ModernDashboard = () => {
     });
   };
 
-  const loadZones = async () => {
-    try {
-      const response = await farmAPI.getZones();
-      setZones(response.data.zones);
-    } catch (error) {
-      console.error('Error loading zones:', error);
-    }
-  };
-
-  const handleZoneChange = async (zone) => {
+  // OFFLINE-FIRST: Zone selection now just updates state, data loads automatically via hook
+  const handleZoneChange = (zone) => {
     setSelectedZone(zone);
     setPredictions(null);
-    
-    if (!zone) return;
-
-    try {
-      const response = await farmAPI.getLatest(zone);
-      setCurrentData(response.data.data);
-    } catch (error) {
-      console.error('Error loading data:', error);
-    }
+    // No need to manually fetch - useLatestData hook handles it automatically
   };
 
   const getRecommendations = async () => {

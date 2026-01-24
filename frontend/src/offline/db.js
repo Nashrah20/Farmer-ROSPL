@@ -168,4 +168,65 @@ export const getSetting = async (key) => {
   }
 };
 
+// Auto-cleanup old history data (keep only last 7 days)
+export const cleanupOldHistory = async () => {
+  try {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const cutoffDate = sevenDaysAgo.toISOString();
+
+    const deletedCount = await db.historyData
+      .where('timestamp')
+      .below(cutoffDate)
+      .delete();
+
+    console.log(`Cleaned up ${deletedCount} old history records`);
+    return deletedCount;
+  } catch (error) {
+    console.error('Error cleaning up history:', error);
+    return 0;
+  }
+};
+
+// Delete synced actions older than 30 days
+export const cleanupSyncedActions = async () => {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const cutoffDate = thirtyDaysAgo.toISOString();
+
+    const deletedCount = await db.pendingActions
+      .where('synced')
+      .equals(true)
+      .and(item => item.timestamp < cutoffDate)
+      .delete();
+
+    console.log(`Cleaned up ${deletedCount} old synced actions`);
+    return deletedCount;
+  } catch (error) {
+    console.error('Error cleaning up synced actions:', error);
+    return 0;
+  }
+};
+
+// Run all cleanup tasks
+export const runCleanupTasks = async () => {
+  console.log('Running IndexedDB cleanup tasks...');
+  const historyDeleted = await cleanupOldHistory();
+  const actionsDeleted = await cleanupSyncedActions();
+  return { historyDeleted, actionsDeleted };
+};
+
+// Schedule daily cleanup (call this on app init)
+export const scheduleCleanup = () => {
+  // Run cleanup once per day
+  const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+  
+  // Run immediately on first load
+  runCleanupTasks();
+  
+  // Then schedule daily
+  setInterval(runCleanupTasks, TWENTY_FOUR_HOURS);
+};
+
 export default db;
