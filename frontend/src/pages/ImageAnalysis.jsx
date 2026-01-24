@@ -8,12 +8,65 @@ const ImageAnalysis = () => {
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // Text-to-speech function
+  const speakText = (text) => {
+    window.speechSynthesis.cancel();
+    if (!text) return;
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    if (language === 'hi') {
+      utterance.lang = 'hi-IN';
+    } else if (language === 'mr') {
+      utterance.lang = 'mr-IN';
+    } else {
+      utterance.lang = 'en-US';
+    }
+    
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = (event) => {
+      console.error('Speech error:', event);
+      setIsSpeaking(false);
+    };
+    
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+  };
+
+  // Generate speech text from analysis result
+  const generateSpeechText = (analysisResult) => {
+    if (!analysisResult) return '';
+    
+    const disease = translateDisease(analysisResult.disease || analysisResult.disease_detected);
+    const symptoms = translateSymptoms(analysisResult.symptoms || '');
+    const recommendations = translateRecommendation(analysisResult.recommendations || analysisResult.treatment || '');
+    
+    if (language === 'hi') {
+      return `रोग का पता चला: ${disease}। ${symptoms}। ${recommendations}`;
+    } else if (language === 'mr') {
+      return `रोग आढळला: ${disease}। ${symptoms}। ${recommendations}`;
+    } else {
+      return `Disease detected: ${disease}. ${symptoms}. ${recommendations}`;
+    }
+  };
 
   // Translation helper for disease names
   const translateDisease = (disease) => {
     if (!disease) return 'Unknown';
     
     const diseaseTranslations = {
+      'Nutrient Deficiency (likely Iron and/or Potassium)': language === 'hi' ? 'पोषक तत्वों की कमी (संभवतः आयरन और/या पोटेशियम)' : language === 'mr' ? 'पोषक तत्वांची कमी (संभवतः लोह आणि/किंवा पोटॅशियम)' : disease,
       'Nutrient Deficiency (likely multiple)': language === 'hi' ? 'पोषक तत्वों की कमी (संभवतः एकाधिक)' : language === 'mr' ? 'पोषक तत्वांची कमी (बहुधा अनेक)' : disease,
       'Nutrient Deficiency': language === 'hi' ? 'पोषक तत्वों की कमी' : language === 'mr' ? 'पोषक तत्वांची कमी' : disease,
       'Nitrogen Deficiency': language === 'hi' ? 'नाइट्रोजन की कमी' : language === 'mr' ? 'नायट्रोजनची कमी' : disease,
@@ -67,6 +120,21 @@ const ImageAnalysis = () => {
     
     const translations = {
       'The leaf exhibits': language === 'hi' ? 'पत्ती प्रदर्शित करती है' : 'पान दाखवते',
+      'significant interveinal chlorosis': language === 'hi' ? 'महत्वपूर्ण अंतर्शिरीय क्लोरोसिस' : 'महत्त्वपूर्ण आंतर-शिरा क्लोरोसिस',
+      'where the tissue between the veins appears yellow while the veins themselves remain a darker green': language === 'hi' ? 'जहां नसों के बीच का ऊतक पीला दिखाई देता है जबकि नसें स्वयं गहरे हरे रंग की रहती हैं' : 'जिथे शिरांमधील ऊती पिवळी दिसते तर शिरा स्वतः गडद हिरव्या राहतात',
+      'This pattern is prominent across most of the leaf surface': language === 'hi' ? 'यह पैटर्न पत्ती की अधिकांश सतह पर प्रमुख है' : 'हा नमुना पानाच्या बहुतेक पृष्ठभागावर ठळक आहे',
+      'Additionally, the leaf margins, especially the serrated edges and the tip, show clear signs of browning and desiccation': language === 'hi' ? 'इसके अतिरिक्त, पत्ती के किनारे, विशेष रूप से दाँतेदार किनारे और नोक, भूरेपन और सूखने के स्पष्ट संकेत दिखाते हैं' : 'याव्यतिरिक्त, पानाचे कडा, विशेषतः दाताळलेल्या कडा आणि टोक, तपकिरी होणे आणि सुकणे यांची स्पष्ट चिन्हे दर्शवतात',
+      'distinct marginal chlorosis': language === 'hi' ? 'विशिष्ट सीमांत क्लोरोसिस' : 'स्पष्ट सीमावर्ती क्लोरोसिस',
+      'marginal chlorosis': language === 'hi' ? 'सीमांत क्लोरोसिस' : 'सीमावर्ती क्लोरोसिस',
+      'yellowing': language === 'hi' ? 'पीलापन' : 'पिवळेपणा',
+      'that progresses to necrosis': language === 'hi' ? 'जो परिगलन में बढ़ता है' : 'जो नेक्रोसिसमध्ये वाढते',
+      'browning and death of tissue': language === 'hi' ? 'भूरापन और ऊतक की मृत्यु' : 'तपकिरीपणा आणि ऊतींचा मृत्यू',
+      'along the edges and tip': language === 'hi' ? 'किनारों और नोक के साथ' : 'कडा आणि टोकावर',
+      'Interveinal chlorosis is also visible': language === 'hi' ? 'अंतर्शिरीय क्लोरोसिस भी दिखाई देता है' : 'आंतर-शिरा क्लोरोसिस देखील दिसते',
+      'where the areas between the veins are yellowish-green': language === 'hi' ? 'जहां नसों के बीच के क्षेत्र पीले-हरे हैं' : 'जिथे शिरांमधील क्षेत्रे पिवळसर-हिरवी आहेत',
+      'while the veins themselves remain greener': language === 'hi' ? 'जबकि नसें स्वयं अधिक हरी रहती हैं' : 'तर शिरा स्वतः अधिक हिरव्या राहतात',
+      'The overall leaf surface has a somewhat mottled or speckled appearance': language === 'hi' ? 'पत्ती की समग्र सतह कुछ चित्तीदार या धब्बेदार दिखाई देती है' : 'पानाची एकूण पृष्ठभाग काहीशी ठिपकेदार किंवा चित्तीदार दिसते',
+      'due to uneven chlorosis': language === 'hi' ? 'असमान क्लोरोसिस के कारण' : 'असमान क्लोरोसिसमुळे',
       'prominent interveinal chlorosis': language === 'hi' ? 'प्रमुख अंतर्शिरीय क्लोरोसिस' : 'प्रमुख आंतर-शिरा क्लोरोसिस',
       'where the tissue between the veins appears yellow': language === 'hi' ? 'जहां नसों के बीच का ऊतक पीला दिखाई देता है' : 'जिथे शिरांमधील ऊती पिवळी दिसते',
       'while the veins themselves remain a darker green': language === 'hi' ? 'जबकि नसें स्वयं गहरे हरे रंग की रहती हैं' : 'तर शिरा स्वतः गडद हिरव्या राहतात',
@@ -110,6 +178,18 @@ const ImageAnalysis = () => {
     if (!text || language === 'en') return text;
     
     const recTranslations = {
+      // Exact phrases from screenshot
+      'Conduct a comprehensive soil test to confirm nutrient levels and pH': language === 'hi' ? 'पोषक तत्वों के स्तर और pH की पुष्टि करने के लिए व्यापक मिट्टी परीक्षण करें' : 'पोषक तत्व पातळी आणि pH याची पुष्टी करण्यासाठी सर्वसमावेशक माती चाचणी करा',
+      'Consider a foliar application of': language === 'hi' ? 'पर्ण प्रयोग पर विचार करें' : 'पर्णीय वापर विचारात घ्या',
+      'for immediate, albeit temporary, relief from chlorosis': language === 'hi' ? 'क्लोरोसिस से तत्काल, हालांकि अस्थायी, राहत के लिए' : 'क्लोरोसिसपासून तात्काळ, जरी तात्पुरती, मुक्ती मिळण्यासाठी',
+      'Research the specific pH requirements for this plant species and amend soil accordingly': language === 'hi' ? 'इस पौधे की प्रजाति के लिए विशिष्ट pH आवश्यकताओं पर शोध करें और तदनुसार मिट्टी में संशोधन करें' : 'या वनस्पती प्रजातीसाठी विशिष्ट pH आवश्यकता संशोधन करा आणि त्यानुसार माती सुधारा',
+      'Review watering practices to ensure the plant is not experiencing drought or waterlogging stress': language === 'hi' ? 'यह सुनिश्चित करने के लिए सिंचाई प्रथाओं की समीक्षा करें कि पौधा सूखे या जलभराव तनाव का अनुभव नहीं कर रहा है' : 'वनस्पतीला दुष्काळ किंवा जलसाच्याचा ताण नाही हे सुनिश्चित करण्यासाठी सिंचन पद्धतींचे पुनरावलोकन करा',
+      'Monitor new growth for signs of improvement after implementing treatments': language === 'hi' ? 'उपचार लागू करने के बाद सुधार के संकेतों के लिए नई वृद्धि की निगरानी करें' : 'उपचार अंमलात आणल्यानंतर सुधारणेच्या चिन्हांसाठी नवीन वाढीचे निरीक्षण करा',
+      'Perform a soil test to accurately identify specific nutrient deficiencies and soil pH. Based on the test': language === 'hi' ? 'विशिष्ट पोषक तत्वों की कमी और मिट्टी का pH सटीक रूप से पहचानने के लिए मिट्टी परीक्षण करें। परीक्षण के आधार पर' : 'विशिष्ट पोषक तत्वांची कमी आणि माती pH अचूकपणे ओळखण्यासाठी माती चाचणी करा। चाचणीवर आधारित',
+      'can be applied to the soil or as a foliar spray': language === 'hi' ? 'मिट्टी में या पर्ण स्प्रे के रूप में लगाया जा सकता है' : 'मातीत किंवा पर्णीय स्प्रे म्हणून लावले जाऊ शकते',
+      'a potassium-rich fertilizer or wood ash (if appropriate for the plant and soil pH) can be used': language === 'hi' ? 'पोटेशियम युक्त उर्वरक या लकड़ी की राख (यदि पौधे और मिट्टी के pH के लिए उपयुक्त हो) का उपयोग किया जा सकता है' : 'पोटॅशियम समृद्ध खत किंवा लाकडाची राख (वनस्पती आणि माती pH साठी योग्य असल्यास) वापरली जाऊ शकते',
+      'Adjust soil pH if it is outside the optimal range for the plant species, as incorrect pH often locks up nutrients': language === 'hi' ? 'यदि यह पौधे की प्रजाति के लिए इष्टतम सीमा से बाहर है तो मिट्टी का pH समायोजित करें, क्योंकि गलत pH अक्सर पोषक तत्वों को बंद कर देता है' : 'वनस्पती प्रजातीसाठी इष्टतम श्रेणीच्या बाहेर असल्यास माती pH समायोजित करा, कारण चुकीचा pH अनेकदा पोषक तत्वे अडकवतो',
+      
       // Suggestions translations
       'Conduct a comprehensive soil test to identify specific nutrient deficiencies and soil pH': language === 'hi' ? 'विशिष्ट पोषक तत्वों की कमी और मिट्टी का pH निर्धारित करने के लिए व्यापक मिट्टी परीक्षण करें' : 'विशिष्ट पोषक तत्वांची कमी आणि मातीचा pH ओळखण्यासाठी सर्वसमावेशक माती चाचणी करा',
       'Perform a comprehensive soil test to accurately identify specific nutrient deficiencies and soil pH': language === 'hi' ? 'विशिष्ट पोषक तत्वों की कमी और मिट्टी का pH सटीक रूप से निर्धारित करने के लिए व्यापक मिट्टी परीक्षण करें' : 'विशिष्ट पोषक तत्वांची कमी आणि मातीचा pH अचूकपणे ओळखण्यासाठी सर्वसमावेशक माती चाचणी करा',
@@ -163,7 +243,16 @@ const ImageAnalysis = () => {
       'Conduct soil testing to determine nutrient deficiencies': language === 'hi' ? 'पोषक तत्वों की कमी निर्धारित करने के लिए मिट्टी परीक्षण करें' : 'पोषक तत्वांची कमी निश्चित करण्यासाठी माती चाचणी करा',
       'Monitor plant health regularly for early intervention': language === 'hi' ? 'शीघ्र हस्तक्षेप के लिए पौधे के स्वास्थ्य की नियमित निगरानी करें' : 'लवकर हस्तक्षेपासाठी वनस्पती आरोग्याचे नियमित निरीक्षण करा',
       
-      // Common words
+      // Common words and phrases
+      'Perform a comprehensive soil test to identify nutrient imbalances': language === 'hi' ? 'पोषक असंतुलन की पहचान करने के लिए व्यापक मिट्टी परीक्षण करें' : 'पोषक असंतुलन ओळखण्यासाठी सर्वसमावेशक माती चाचणी करा',
+      'Adjust fertilization practices based on soil test results, focusing on potassium and magnesium': language === 'hi' ? 'पोटेशियम और मैग्नीशियम पर ध्यान केंद्रित करते हुए मिट्टी परीक्षण परिणामों के आधार पर उर्वरक प्रथाओं को समायोजित करें' : 'पोटॅशियम आणि मॅग्नेशियमवर लक्ष केंद्रित करून माती चाचणी निकालांवर आधारित खत पद्धती समायोजित करा',
+      'Check irrigation practices to ensure consistent moisture without waterlogging': language === 'hi' ? 'जलभराव के बिना लगातार नमी सुनिश्चित करने के लिए सिंचाई प्रथाओं की जांच करें' : 'जलसाचाशिवाय सातत्यपूर्ण ओलावा सुनिश्चित करण्यासाठी सिंचन पद्धतींची तपासणी करा',
+      'Monitor new leaf growth for symptom improvement or progression': language === 'hi' ? 'लक्षणों में सुधार या प्रगति के लिए नई पत्ती की वृद्धि की निगरानी करें' : 'लक्षण सुधारणा किंवा प्रगतीसाठी नवीन पानांच्या वाढीचे निरीक्षण करा',
+      'Conduct a soil test to determine specific nutrient deficiencies and pH levels': language === 'hi' ? 'विशिष्ट पोषक तत्वों की कमी और pH स्तर निर्धारित करने के लिए मिट्टी परीक्षण करें' : 'विशिष्ट पोषक तत्वांची कमी आणि pH पातळी निश्चित करण्यासाठी माती चाचणी करा',
+      'high potassium fertilizer for K deficiency': language === 'hi' ? 'K की कमी के लिए उच्च पोटेशियम उर्वरक' : 'K च्या कमीसाठी उच्च पोटॅशियम खत',
+      'Ensure proper watering to avoid both drought and waterlogging': language === 'hi' ? 'सूखे और जलभराव दोनों से बचने के लिए उचित सिंचाई सुनिश्चित करें' : 'दुष्काळ आणि जलसाचा दोन्ही टाळण्यासाठी योग्य सिंचन सुनिश्चित करा',
+      'Adjust soil pH if necessary to optimize nutrient availability': language === 'hi' ? 'पोषक तत्वों की उपलब्धता को अनुकूलित करने के लिए आवश्यक होने पर मिट्टी का pH समायोजित करें' : 'पोषक तत्व उपलब्धता इष्टतम करण्यासाठी आवश्यक असल्यास माती pH समायोजित करा',
+      'Maintain a balanced fertilization program based on regular soil tests': language === 'hi' ? 'नियमित मिट्टी परीक्षणों के आधार पर संतुलित उर्वरक कार्यक्रम बनाए रखें' : 'नियमित माती चाचण्यांवर आधारित संतुलित खत कार्यक्रम राखा',
       'e.g.': language === 'hi' ? 'जैसे' : 'उदा.',
       'iron chelate': language === 'hi' ? 'आयरन केलेट' : 'लोह केलेट',
       'magnesium sulfate': language === 'hi' ? 'मैग्नीशियम सल्फेट' : 'मॅग्नेशियम सल्फेट',
@@ -276,6 +365,11 @@ const ImageAnalysis = () => {
       
       if (data.success && data.analysis) {
         setResult(data.analysis);
+        // Speak the analysis result
+        const speechText = generateSpeechText(data.analysis);
+        if (speechText) {
+          speakText(speechText);
+        }
       } else {
         setError(data.error || data.analysis?.error || 'Analysis failed');
       }
@@ -391,6 +485,18 @@ const ImageAnalysis = () => {
                   </span>
                 ) : t.imageAnalysis.analyze}
               </button>
+
+              {isSpeaking && (
+                <button
+                  onClick={stopSpeaking}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clipRule="evenodd" />
+                  </svg>
+                  {language === 'hi' ? 'रोकें' : language === 'mr' ? 'थांबवा' : 'Stop'}
+                </button>
+              )}
             </div>
 
             {analyzing && (

@@ -30,6 +30,71 @@ const Recommendations = () => {
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // Translation function for explanation text
+  const translateExplanation = (text) => {
+    if (language === 'en' || !text) return text;
+    
+    // Generate a Hindi/Marathi summary from the numbers in prediction
+    if (prediction && prediction.predictions) {
+      const { irrigation_liters, fertilizer_N_g, fertilizer_P_g, fertilizer_K_g } = prediction.predictions;
+      
+      if (language === 'hi') {
+        return `वर्तमान मौसम और मिट्टी की स्थिति के आधार पर, हमारा एआई मॉडल निम्नलिखित सिफारिश करता है। ${irrigation_liters} लीटर पानी से सिंचाई करें। ${fertilizer_N_g} ग्राम नाइट्रोजन, ${fertilizer_P_g} ग्राम फॉस्फोरस, और ${fertilizer_K_g} ग्राम पोटेशियम उर्वरक डालें। यह आपकी फसल की वृद्धि में मदद करेगा और उत्पादन बढ़ाएगा। सुबह या शाम के समय उर्वरक का प्रयोग करें जब तापमान कम हो।`;
+      } else if (language === 'mr') {
+        return `सध्याच्या हवामान आणि मातीच्या स्थितीच्या आधारावर, आमचे एआय मॉडेल खालील शिफारस करते। ${irrigation_liters} लिटर पाण्याने सिंचन करा। ${fertilizer_N_g} ग्राम नायट्रोजन, ${fertilizer_P_g} ग्राम फॉस्फरस, आणि ${fertilizer_K_g} ग्राम पोटॅशियम खत घाला। हे तुमच्या पिकाच्या वाढीस मदत करेल आणि उत्पादन वाढवेल। सकाळी किंवा संध्याकाळी खत टाका जेव्हा तापमान कमी असेल।`;
+      }
+    }
+    
+    return text;
+  };
+
+  // Speech synthesis function
+  const speakText = (text) => {
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+    
+    if (!text) return;
+    
+    // Translate the text first
+    const translatedText = translateExplanation(text);
+    
+    const utterance = new SpeechSynthesisUtterance(translatedText);
+    
+    // Set language based on current language
+    if (language === 'hi') {
+      utterance.lang = 'hi-IN';
+    } else if (language === 'mr') {
+      utterance.lang = 'mr-IN';
+    } else {
+      utterance.lang = 'en-US';
+    }
+    
+    utterance.rate = 0.9; // Slightly slower for better clarity
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    
+    utterance.onstart = () => {
+      setIsSpeaking(true);
+    };
+    
+    utterance.onend = () => {
+      setIsSpeaking(false);
+    };
+    
+    utterance.onerror = (event) => {
+      console.error('Speech synthesis error:', event);
+      setIsSpeaking(false);
+    };
+    
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+  };
 
   // Extract zone info (soil type, crop, region)
   const getZoneInfo = (zoneId) => {
@@ -128,6 +193,11 @@ const Recommendations = () => {
     try {
       const response = await farmAPI.predict(selectedZone);
       setPrediction(response.data.prediction);
+      
+      // Speak the recommendation after receiving it
+      if (response.data.prediction && response.data.prediction.explanation) {
+        speakText(response.data.prediction.explanation);
+      }
     } catch (error) {
       console.error('Error getting prediction:', error);
       alert('Failed to get recommendation');
@@ -204,6 +274,17 @@ const Recommendations = () => {
             >
               {loading ? `⏳ ${t.recommendations.processing}` : `🚀 ${t.recommendations.getRecommendation}`}
             </button>
+            {isSpeaking && (
+              <button
+                onClick={stopSpeaking}
+                className="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clipRule="evenodd" />
+                </svg>
+                {language === 'hi' ? 'रोकें' : language === 'mr' ? 'थांबवा' : 'Stop'}
+              </button>
+            )}
           </div>
           {zones.length > 0 && (
             <p className="text-xs text-gray-500 mt-2">

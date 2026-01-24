@@ -27,6 +27,56 @@ const ModernDashboard = () => {
   const [modelInfo, setModelInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // Text-to-speech function
+  const speakText = (text) => {
+    window.speechSynthesis.cancel();
+    if (!text) return;
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    if (language === 'hi') {
+      utterance.lang = 'hi-IN';
+    } else if (language === 'mr') {
+      utterance.lang = 'mr-IN';
+    } else {
+      utterance.lang = 'en-US';
+    }
+    
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = (event) => {
+      console.error('Speech error:', event);
+      setIsSpeaking(false);
+    };
+    
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+  };
+
+  // Generate speech text from predictions
+  const generateSpeechFromPredictions = (pred) => {
+    if (!pred) return '';
+    
+    const { irrigation_liters, fertilizer_N_g, fertilizer_P_g, fertilizer_K_g } = pred;
+    
+    if (language === 'hi') {
+      return `एआई सिफारिश तैयार है। ${irrigation_liters} लीटर पानी से सिंचाई करें। ${fertilizer_N_g} ग्राम नाइट्रोजन, ${fertilizer_P_g} ग्राम फॉस्फोरस, और ${fertilizer_K_g} ग्राम पोटेशियम उर्वरक डालें। यह आपकी फसल की अच्छी वृद्धि सुनिश्चित करेगा।`;
+    } else if (language === 'mr') {
+      return `एआय शिफारस तयार आहे। ${irrigation_liters} लिटर पाण्याने सिंचन करा। ${fertilizer_N_g} ग्राम नायट्रोजन, ${fertilizer_P_g} ग्राम फॉस्फरस, आणि ${fertilizer_K_g} ग्राम पोटॅशियम खत घाला। हे तुमच्या पिकाची चांगली वाढ सुनिश्चित करेल।`;
+    } else {
+      return `AI recommendation ready. Apply ${irrigation_liters} liters of water for irrigation. Apply ${fertilizer_N_g} grams of Nitrogen, ${fertilizer_P_g} grams of Phosphorus, and ${fertilizer_K_g} grams of Potassium fertilizer. This will ensure good crop growth.`;
+    }
+  };
 
   // Translation helper for AI explanations
   const translateExplanation = (text, lang) => {
@@ -157,6 +207,11 @@ const ModernDashboard = () => {
           explanation: pred.explanation,
           input_summary: pred.input_summary
         });
+        // Speak the recommendations
+        const speechText = generateSpeechFromPredictions(pred.predictions);
+        if (speechText) {
+          speakText(speechText);
+        }
       }
     } catch (error) {
       console.error('Error:', error);
@@ -391,29 +446,43 @@ const ModernDashboard = () => {
 
             {/* AI Recommendations Button */}
             <div className="text-center mb-8">
-              <button
-                onClick={getRecommendations}
-                disabled={loading}
-                className="group relative px-8 py-4 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  {loading ? (
-                    <>
-                      <svg className="animate-spin w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      {t.dashboard.processingMagic}
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
-                      </svg>
-                      {t.dashboard.getAIRecommendations}
-                    </>
-                  )}
-                </span>
-              </button>
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={getRecommendations}
+                  disabled={loading}
+                  className="group relative px-8 py-4 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    {loading ? (
+                      <>
+                        <svg className="animate-spin w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        {t.dashboard.processingMagic}
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+                        </svg>
+                        {t.dashboard.getAIRecommendations}
+                      </>
+                    )}
+                  </span>
+                </button>
+                
+                {isSpeaking && (
+                  <button
+                    onClick={stopSpeaking}
+                    className="px-6 py-4 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl shadow-lg transition flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clipRule="evenodd" />
+                    </svg>
+                    {language === 'hi' ? 'रोकें' : language === 'mr' ? 'थांबवा' : 'Stop'}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Predictions */}
