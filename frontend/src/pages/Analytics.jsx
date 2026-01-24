@@ -34,11 +34,52 @@ const Analytics = () => {
     const label = ZONE_LABELS[zoneId] || zoneId;
     const parts = label.split(' - ');
     if (parts.length >= 2) {
-      const soilType = parts[0].replace(/[🌾🌿🌱🌰🥥🍬🍌🍉]/g, '').trim();
+      let soilType = parts[0].replace(/[🌾🌿🌱🌰🥥🍬🍌🍉]/g, '').trim();
       const cropAndRegion = parts[1];
       const regionMatch = cropAndRegion.match(/\(([^)]+)\)/);
-      const crop = cropAndRegion.replace(/\([^)]+\)/, '').trim();
-      const region = regionMatch ? regionMatch[1] : 'Maharashtra';
+      let crop = cropAndRegion.replace(/\([^)]+\)/, '').trim();
+      let region = regionMatch ? regionMatch[1] : 'Maharashtra';
+      
+      // Translate soil types
+      const soilTranslations = {
+        'Alluvial Soil': language === 'hi' ? 'जलोढ़ मिट्टी' : language === 'mr' ? 'जलोड माती' : 'Alluvial Soil',
+        'Black Soil': language === 'hi' ? 'काली मिट्टी' : language === 'mr' ? 'काळी माती' : 'Black Soil',
+        'Coarse Soil': language === 'hi' ? 'मोटी मिट्टी' : language === 'mr' ? 'जाड माती' : 'Coarse Soil',
+        'Laterite Soil': language === 'hi' ? 'लैटराइट मिट्टी' : language === 'mr' ? 'लॅटराइट माती' : 'Laterite Soil',
+        'Yellow-Brown Soil': language === 'hi' ? 'पीली-भूरी मिट्टी' : language === 'mr' ? 'पिवळी-तपकिरी माती' : 'Yellow-Brown Soil'
+      };
+      
+      // Translate crops
+      const cropTranslations = {
+        'Sugarcane': language === 'hi' ? 'गन्ना' : language === 'mr' ? 'ऊस' : 'Sugarcane',
+        'Wheat': language === 'hi' ? 'गेहूं' : language === 'mr' ? 'गहू' : 'Wheat',
+        'Banana': language === 'hi' ? 'केला' : language === 'mr' ? 'केळ' : 'Banana',
+        'Cotton': language === 'hi' ? 'कपास' : language === 'mr' ? 'कापूस' : 'Cotton',
+        'Soybean': language === 'hi' ? 'सोयाबीन' : language === 'mr' ? 'सोयाबीन' : 'Soybean',
+        'Jowar': language === 'hi' ? 'ज्वार' : language === 'mr' ? 'ज्वारी' : 'Jowar',
+        'Groundnut': language === 'hi' ? 'मूंगफली' : language === 'mr' ? 'भुईमूग' : 'Groundnut',
+        'Bajra': language === 'hi' ? 'बाजरा' : language === 'mr' ? 'बाजरी' : 'Bajra',
+        'Watermelon': language === 'hi' ? 'तरबूज' : language === 'mr' ? 'कलिंगड' : 'Watermelon',
+        'Cashew': language === 'hi' ? 'काजू' : language === 'mr' ? 'काजू' : 'Cashew',
+        'Coconut': language === 'hi' ? 'नारियल' : language === 'mr' ? 'नारळ' : 'Coconut',
+        'Rice': language === 'hi' ? 'चावल' : language === 'mr' ? 'तांदूळ' : 'Rice',
+        'Ragi': language === 'hi' ? 'रागी' : language === 'mr' ? 'नाचणी' : 'Ragi',
+        'Tur': language === 'hi' ? 'तुर' : language === 'mr' ? 'तूर' : 'Tur'
+      };
+      
+      // Translate regions
+      const regionTranslations = {
+        'WestMaha': language === 'hi' ? 'पश्चिम महाराष्ट्र' : language === 'mr' ? 'पश्चिम महाराष्ट्र' : 'WestMaha',
+        'NorthMaha': language === 'hi' ? 'उत्तर महाराष्ट्र' : language === 'mr' ? 'उत्तर महाराष्ट्र' : 'NorthMaha',
+        'Vidarbha': language === 'hi' ? 'विदर्भ' : language === 'mr' ? 'विदर्भ' : 'Vidarbha',
+        'Konkan': language === 'hi' ? 'कोंकण' : language === 'mr' ? 'कोंकण' : 'Konkan',
+        'Maharashtra': language === 'hi' ? 'महाराष्ट्र' : language === 'mr' ? 'महाराष्ट्र' : 'Maharashtra'
+      };
+      
+      soilType = soilTranslations[soilType] || soilType;
+      crop = cropTranslations[crop] || crop;
+      region = regionTranslations[region] || region;
+      
       return { soilType, crop, region, fullLabel: label };
     }
     return { soilType: 'Unknown', crop: 'Unknown', region: 'Maharashtra', fullLabel: label };
@@ -196,30 +237,6 @@ const Analytics = () => {
         ) : historyData ? (
           <div className="space-y-6">
             <ChartsPanel historyData={historyData} />
-            
-            {/* Statistics Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-lg p-6">
-                <div className="text-3xl mb-2">📊</div>
-                <p className="text-sm opacity-90">{t.analytics.totalDataPoints}</p>
-                <p className="text-3xl font-bold">{historyData.length}</p>
-              </div>
-              <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg p-6">
-                <div className="text-3xl mb-2">📅</div>
-                <p className="text-sm opacity-90">{t.analytics.daysTracked}</p>
-                <p className="text-3xl font-bold">30</p>
-              </div>
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-lg p-6">
-                <div className="text-3xl mb-2">🌱</div>
-                <p className="text-sm opacity-90">{t.analytics.zoneType}</p>
-                <p className="text-xl font-bold">{ZONE_LABELS[selectedZone] || selectedZone}</p>
-              </div>
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-lg p-6">
-                <div className="text-3xl mb-2">🌾</div>
-                <p className="text-sm opacity-90">{t.analytics.cropType}</p>
-                <p className="text-sm text-gray-600">{t.analytics.zone}: {selectedZone}</p>
-              </div>
-            </div>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">

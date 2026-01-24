@@ -109,7 +109,7 @@ const ChartsPanel = ({ historyData }) => {
                 : 'bg-white/80 text-gray-700 hover:bg-white'
             }`}
           >
-            📆 1 Month
+            📆 {language === 'hi' ? '1 महीना' : language === 'mr' ? '1 महिना' : '1 Month'}
           </button>
         </div>
       </div>
