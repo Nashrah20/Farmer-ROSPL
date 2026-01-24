@@ -3,11 +3,21 @@ import { farmAPI } from '../api/api';
 
 // Zone display name mapping
 const ZONE_LABELS = {
-  'CS1': '🌾 Coarse - Groundnut', 'CS2': '🌾 Coarse - Bajra', 'CS3': '🍉 Coarse - Watermelon',
-  'BS1': '🌿 Black - Cotton', 'BS2': '🌱 Black - Soybean', 'BS3': '🌾 Black - Jowar',
-  'LS1': '🌰 Laterite - Cashew', 'LS2': '🥥 Laterite - Coconut', 'LS3': '🌾 Laterite - Rice',
-  'AS1': '🍬 Alluvial - Sugarcane', 'AS2': '🌾 Alluvial - Wheat', 'AS3': '🍌 Alluvial - Banana',
-  'YS1': '🌾 Yellow-Brown - Rice', 'YS2': '🌾 Yellow-Brown - Ragi', 'YS3': '🌾 Yellow-Brown - Tur',
+  'CS1': '🌾 Coarse Soil - Groundnut (NorthMaha)',
+  'CS2': '🌾 Coarse Soil - Bajra (WestMaha)',
+  'CS3': '🍉 Coarse Soil - Watermelon (Vidarbha)',
+  'BS1': '🌿 Black Soil - Cotton (Vidarbha)',
+  'BS2': '🌱 Black Soil - Soybean (WestMaha)',
+  'BS3': '🌾 Black Soil - Jowar (NorthMaha)',
+  'LS1': '🌰 Laterite Soil - Cashew (Konkan)',
+  'LS2': '🥥 Laterite Soil - Coconut (Konkan)',
+  'LS3': '🌾 Laterite Soil - Rice (Konkan)',
+  'AS1': '🍬 Alluvial Soil - Sugarcane (WestMaha)',
+  'AS2': '🌾 Alluvial Soil - Wheat (NorthMaha)',
+  'AS3': '🍌 Alluvial Soil - Banana (WestMaha)',
+  'YS1': '🌾 Yellow-Brown Soil - Rice (Konkan)',
+  'YS2': '🌾 Yellow-Brown Soil - Ragi (Vidarbha)',
+  'YS3': '🌾 Yellow-Brown Soil - Tur (NorthMaha)',
 };
 import {
   saveZones,
@@ -29,6 +39,21 @@ const Dashboard = () => {
   const formatNumber = (num, decimals = 2) => {
     if (num === null || num === undefined) return '0';
     return Number(num).toFixed(decimals);
+  };
+
+  // Extract zone info (soil type, crop, region)
+  const getZoneInfo = (zoneId) => {
+    const label = ZONE_LABELS[zoneId] || zoneId;
+    const parts = label.split(' - ');
+    if (parts.length >= 2) {
+      const soilType = parts[0].replace(/[🌾🌿🌱🌰🥥🍬🍌🍉]/g, '').trim();
+      const cropAndRegion = parts[1];
+      const regionMatch = cropAndRegion.match(/\(([^)]+)\)/);
+      const crop = cropAndRegion.replace(/\([^)]+\)/, '').trim();
+      const region = regionMatch ? regionMatch[1] : 'Maharashtra';
+      return { soilType, crop, region, fullLabel: label };
+    }
+    return { soilType: 'Unknown', crop: 'Unknown', region: 'Maharashtra', fullLabel: label };
   };
 
   const formatTimestamp = (timestamp) => {
@@ -296,6 +321,67 @@ const Dashboard = () => {
 
         {selectedZone && latestData && (
           <>
+            {/* Farm & Soil Information */}
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg shadow-lg border-2 border-amber-200 p-6 mb-6">
+              <h2 className="text-xl font-bold text-amber-900 mb-4 flex items-center gap-2">
+                <span className="text-2xl">🏡</span> Farm & Soil Information
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Soil Information */}
+                <div className="bg-white rounded-lg p-5 shadow-md">
+                  <p className="text-base font-semibold text-amber-900 mb-3 flex items-center gap-2">
+                    <span className="text-xl">🌱</span> Soil Information
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 w-24">Type:</span>
+                      <span className="text-base font-semibold text-gray-800">{getZoneInfo(selectedZone).soilType}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 w-24">Crop:</span>
+                      <span className="text-base font-semibold text-gray-800">{getZoneInfo(selectedZone).crop}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 w-24">Region:</span>
+                      <span className="text-base font-semibold text-gray-800">{getZoneInfo(selectedZone).region}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 w-24">Zone ID:</span>
+                      <span className="text-sm font-mono font-semibold text-primary-600">{selectedZone}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Farm Information */}
+                <div className="bg-white rounded-lg p-5 shadow-md">
+                  <p className="text-base font-semibold text-green-900 mb-3 flex items-center gap-2">
+                    <span className="text-xl">🚜</span> Farm Information
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 w-24">Size:</span>
+                      <span className="text-base font-semibold text-gray-800">1 Acre</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 w-24">Area:</span>
+                      <span className="text-base font-semibold text-gray-800">4,047 m²</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 w-24">Location:</span>
+                      <span className="text-base font-semibold text-gray-800">Maharashtra, India</span>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600 w-24">Status:</span>
+                      <span className="text-sm font-semibold text-green-600 flex items-center gap-1">
+                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        Active Monitoring
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Current Conditions */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
@@ -445,6 +531,7 @@ const Dashboard = () => {
                 prediction={prediction}
                 onApprove={handleApproveAction}
                 approving={approving}
+                zoneInfo={getZoneInfo(selectedZone)}
               />
             </div>
           </>

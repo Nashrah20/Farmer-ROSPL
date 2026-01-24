@@ -31,6 +31,21 @@ const Recommendations = () => {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Extract zone info (soil type, crop, region)
+  const getZoneInfo = (zoneId) => {
+    const label = ZONE_LABELS[zoneId] || zoneId;
+    const parts = label.split(' - ');
+    if (parts.length >= 2) {
+      const soilType = parts[0].replace(/[🌾🌿🌱🌰🥥🍬🍌🍉]/g, '').trim();
+      const cropAndRegion = parts[1];
+      const regionMatch = cropAndRegion.match(/\(([^)]+)\)/);
+      const crop = cropAndRegion.replace(/\([^)]+\)/, '').trim();
+      const region = regionMatch ? regionMatch[1] : 'Maharashtra';
+      return { soilType, crop, region, fullLabel: label };
+    }
+    return { soilType: 'Unknown', crop: 'Unknown', region: 'Maharashtra', fullLabel: label };
+  };
+
   useEffect(() => {
     loadZones();
   }, []);
@@ -161,6 +176,7 @@ const Recommendations = () => {
           prediction={prediction}
           onApprove={handleApprove}
           approving={false}
+          zoneInfo={selectedZone ? getZoneInfo(selectedZone) : null}
         />
 
         {!prediction && (

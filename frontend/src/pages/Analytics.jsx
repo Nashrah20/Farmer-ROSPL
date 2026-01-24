@@ -4,20 +4,45 @@ import { useLanguage } from '../context/LanguageContext';
 
 // Zone display name mapping
 const ZONE_LABELS = {
-  'CS1': '🌾 Coarse - Groundnut', 'CS2': '🌾 Coarse - Bajra', 'CS3': '🍉 Coarse - Watermelon',
-  'BS1': '🌿 Black - Cotton', 'BS2': '🌱 Black - Soybean', 'BS3': '🌾 Black - Jowar',
-  'LS1': '🌰 Laterite - Cashew', 'LS2': '🥥 Laterite - Coconut', 'LS3': '🌾 Laterite - Rice',
-  'AS1': '🍬 Alluvial - Sugarcane', 'AS2': '🌾 Alluvial - Wheat', 'AS3': '🍌 Alluvial - Banana',
-  'YS1': '🌾 Yellow-Brown - Rice', 'YS2': '🌾 Yellow-Brown - Ragi', 'YS3': '🌾 Yellow-Brown - Tur',
+  'CS1': '🌾 Coarse Soil - Groundnut (NorthMaha)',
+  'CS2': '🌾 Coarse Soil - Bajra (WestMaha)',
+  'CS3': '🍉 Coarse Soil - Watermelon (Vidarbha)',
+  'BS1': '🌿 Black Soil - Cotton (Vidarbha)',
+  'BS2': '🌱 Black Soil - Soybean (WestMaha)',
+  'BS3': '🌾 Black Soil - Jowar (NorthMaha)',
+  'LS1': '🌰 Laterite Soil - Cashew (Konkan)',
+  'LS2': '🥥 Laterite Soil - Coconut (Konkan)',
+  'LS3': '🌾 Laterite Soil - Rice (Konkan)',
+  'AS1': '🍬 Alluvial Soil - Sugarcane (WestMaha)',
+  'AS2': '🌾 Alluvial Soil - Wheat (NorthMaha)',
+  'AS3': '🍌 Alluvial Soil - Banana (WestMaha)',
+  'YS1': '🌾 Yellow-Brown Soil - Rice (Konkan)',
+  'YS2': '🌾 Yellow-Brown Soil - Ragi (Vidarbha)',
+  'YS3': '🌾 Yellow-Brown Soil - Tur (NorthMaha)',
 };
 import ChartsPanel from '../components/ChartsPanel';
 
 const Analytics = () => {
-  const { t } = useLanguage();
+  const { t, language, getZoneLabel } = useLanguage();
   const [zones, setZones] = useState([]);
   const [selectedZone, setSelectedZone] = useState('');
   const [historyData, setHistoryData] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Extract zone info (soil type, crop, region)
+  const getZoneInfo = (zoneId) => {
+    const label = ZONE_LABELS[zoneId] || zoneId;
+    const parts = label.split(' - ');
+    if (parts.length >= 2) {
+      const soilType = parts[0].replace(/[🌾🌿🌱🌰🥥🍬🍌🍉]/g, '').trim();
+      const cropAndRegion = parts[1];
+      const regionMatch = cropAndRegion.match(/\(([^)]+)\)/);
+      const crop = cropAndRegion.replace(/\([^)]+\)/, '').trim();
+      const region = regionMatch ? regionMatch[1] : 'Maharashtra';
+      return { soilType, crop, region, fullLabel: label };
+    }
+    return { soilType: 'Unknown', crop: 'Unknown', region: 'Maharashtra', fullLabel: label };
+  };
 
   useEffect(() => {
     loadZones();
@@ -89,11 +114,76 @@ const Analytics = () => {
             <option value="">{t.analytics.selectAZone}</option>
             {zones.map((zone) => (
               <option key={zone} value={zone}>
-                {ZONE_LABELS[zone] || zone}
+                {getZoneLabel(zone)}
               </option>
             ))}
           </select>
         </div>
+
+        {/* Farm & Soil Information */}
+        {selectedZone && (
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow-lg border-2 border-amber-300 p-6 mb-6">
+            <h2 className="text-2xl font-bold text-amber-900 mb-4 flex items-center gap-2">
+              <span className="text-2xl">🏡</span> {language === 'hi' ? 'खेत और मिट्टी की जानकारी' : language === 'mr' ? 'शेत आणि मातीची माहिती' : 'Farm & Soil Information'}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Soil Information */}
+              <div className="bg-white rounded-lg p-5 shadow-md border border-amber-200">
+                <p className="text-base font-semibold text-amber-900 mb-3 flex items-center gap-2">
+                  <span className="text-xl">🌱</span> {language === 'hi' ? 'मिट्टी की जानकारी' : language === 'mr' ? 'मातीची माहिती' : 'Soil Information'}
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-24">{language === 'hi' ? 'प्रकार:' : language === 'mr' ? 'प्रकार:' : 'Type:'}</span>
+                    <span className="text-base font-semibold text-gray-800">{getZoneInfo(selectedZone).soilType}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-24">{language === 'hi' ? 'फसल:' : language === 'mr' ? 'पिक:' : 'Crop:'}</span>
+                    <span className="text-base font-semibold text-gray-800">{getZoneInfo(selectedZone).crop}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-24">{language === 'hi' ? 'क्षेत्र:' : language === 'mr' ? 'प्रदेश:' : 'Region:'}</span>
+                    <span className="text-base font-semibold text-gray-800">{getZoneInfo(selectedZone).region}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-24">{language === 'hi' ? 'जोन आईडी:' : language === 'mr' ? 'झोन आयडी:' : 'Zone ID:'}</span>
+                    <span className="text-sm font-mono font-semibold text-primary-600">{selectedZone}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Farm Information */}
+              <div className="bg-white rounded-lg p-5 shadow-md border border-amber-200">
+                <p className="text-base font-semibold text-green-900 mb-3 flex items-center gap-2">
+                  <span className="text-xl">🚜</span> {language === 'hi' ? 'खेत की जानकारी' : language === 'mr' ? 'शेताची माहिती' : 'Farm Information'}
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-24">{language === 'hi' ? 'आकार:' : language === 'mr' ? 'आकार:' : 'Size:'}</span>
+                    <span className="text-base font-semibold text-gray-800">1 {language === 'hi' ? 'एकड़' : language === 'mr' ? 'एकर' : 'Acre'}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-24">{language === 'hi' ? 'क्षेत्रफल:' : language === 'mr' ? 'क्षेत्रफळ:' : 'Area:'}</span>
+                    <span className="text-base font-semibold text-gray-800">4,047 m²</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-24">{language === 'hi' ? 'स्थान:' : language === 'mr' ? 'स्थान:' : 'Location:'}</span>
+                    <span className="text-base font-semibold text-gray-800">{language === 'hi' ? 'महाराष्ट्र, भारत' : language === 'mr' ? 'महाराष्ट्र, भारत' : 'Maharashtra, India'}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-24">{language === 'hi' ? 'विश्लेषण:' : language === 'mr' ? 'विश्लेषण:' : 'Analysis:'}</span>
+                    <span className="text-sm font-semibold text-blue-600 flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                      </svg>
+                      {language === 'hi' ? '30 दिन ट्रैकिंग' : language === 'mr' ? '30 दिवस ट्रॅकिंग' : '30 Days Tracking'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Charts */}
         {loading ? (

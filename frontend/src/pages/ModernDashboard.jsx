@@ -28,6 +28,77 @@ const ModernDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  // Translation helper for AI explanations
+  const translateExplanation = (text, lang) => {
+    if (lang === 'en') return text;
+    
+    const translations = {
+      hi: {
+        'Minimal irrigation': 'न्यूनतम सिंचाई',
+        'Moderate irrigation': 'मध्यम सिंचाई',
+        'High irrigation': 'अधिक सिंचाई',
+        'required': 'आवश्यक',
+        'recommended': 'अनुशंसित',
+        'soil moisture adequate': 'मिट्टी की नमी पर्याप्त',
+        'soil moisture low': 'मिट्टी की नमी कम',
+        'Fertilizer': 'उर्वरक',
+        'supplement needed': 'पूरक आवश्यक',
+        'current': 'वर्तमान',
+        'Plant stress detected': 'पौधे में तनाव का पता चला',
+        'increased care recommended': 'बढ़ी हुई देखभाल अनुशंसित',
+        'Excellent leaf health': 'उत्कृष्ट पत्ती स्वास्थ्य',
+        'Good leaf health': 'अच्छा पत्ती स्वास्थ्य',
+        'to maintain optimal moisture': 'इष्टतम नमी बनाए रखने के लिए',
+        'level': 'स्तर'
+      },
+      mr: {
+        'Minimal irrigation': 'किमान सिंचन',
+        'Moderate irrigation': 'मध्यम सिंचन',
+        'High irrigation': 'जास्त सिंचन',
+        'required': 'आवश्यक',
+        'recommended': 'शिफारस केलेले',
+        'soil moisture adequate': 'मातीची नमी पुरेशी',
+        'soil moisture low': 'मातीची नमी कमी',
+        'Fertilizer': 'खत',
+        'supplement needed': 'पूरक आवश्यक',
+        'current': 'सध्या',
+        'Plant stress detected': 'वनस्पतीमध्ये ताण आढळला',
+        'increased care recommended': 'वाढीव काळजी शिफारस',
+        'Excellent leaf health': 'उत्कृष्ट पान आरोग्य',
+        'Good leaf health': 'चांगले पान आरोग्य',
+        'to maintain optimal moisture': 'इष्टतम नमी राखण्यासाठी',
+        'level': 'पातळी'
+      }
+    };
+    
+    let translated = text;
+    const langMap = translations[lang];
+    
+    if (langMap) {
+      Object.entries(langMap).forEach(([english, local]) => {
+        const regex = new RegExp(english, 'gi');
+        translated = translated.replace(regex, local);
+      });
+    }
+    
+    return translated;
+  };
+
+  // Extract zone info (soil type, crop, region)
+  const getZoneInfo = (zoneId) => {
+    const label = getZoneLabel(zoneId);
+    const parts = label.split(' - ');
+    if (parts.length >= 2) {
+      const soilType = parts[0].replace(/[🌾🌿🌱🌰🥥🍬🍌🍉]/g, '').trim();
+      const cropAndRegion = parts[1];
+      const regionMatch = cropAndRegion.match(/\(([^)]+)\)/);
+      const crop = cropAndRegion.replace(/\([^)]+\)/, '').trim();
+      const region = regionMatch ? regionMatch[1] : 'महाराष्ट्र';
+      return { soilType, crop, region, fullLabel: label };
+    }
+    return { soilType: 'Unknown', crop: 'Unknown', region: 'महाराष्ट्र', fullLabel: label };
+  };
+
   // OFFLINE-FIRST: Load latest data for selected zone
   const {
     data: currentData,
@@ -148,6 +219,69 @@ const ModernDashboard = () => {
             ))}
           </select>
         </div>
+
+        {/* Farm & Soil Information */}
+        {selectedZone && currentData && (
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow-lg border-2 border-amber-300 p-6 mb-6">
+            <h2 className="text-2xl font-bold text-amber-900 mb-4 flex items-center gap-2">
+              <span className="text-2xl">🏡</span> {language === 'hi' ? 'खेत और मिट्टी की जानकारी' : language === 'mr' ? 'शेत आणि मातीची माहिती' : 'Farm & Soil Information'}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Soil Information */}
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-5 shadow-md border border-amber-200">
+                <p className="text-base font-semibold text-amber-900 mb-3 flex items-center gap-2">
+                  <span className="text-xl">🌱</span> {language === 'hi' ? 'मिट्टी की जानकारी' : language === 'mr' ? 'मातीची माहिती' : 'Soil Information'}
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-28">{language === 'hi' ? 'प्रकार:' : language === 'mr' ? 'प्रकार:' : 'Type:'}</span>
+                    <span className="text-base font-semibold text-gray-800">{getZoneInfo(selectedZone).soilType}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-28">{language === 'hi' ? 'फसल:' : language === 'mr' ? 'पिक:' : 'Crop:'}</span>
+                    <span className="text-base font-semibold text-gray-800">{getZoneInfo(selectedZone).crop}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-28">{language === 'hi' ? 'क्षेत्र:' : language === 'mr' ? 'प्रदेश:' : 'Region:'}</span>
+                    <span className="text-base font-semibold text-gray-800">{getZoneInfo(selectedZone).region}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-28">{language === 'hi' ? 'जोन आईडी:' : language === 'mr' ? 'झोन आयडी:' : 'Zone ID:'}</span>
+                    <span className="text-sm font-mono font-semibold text-primary-600">{selectedZone}</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Farm Information */}
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-5 shadow-md border border-amber-200">
+                <p className="text-base font-semibold text-green-900 mb-3 flex items-center gap-2">
+                  <span className="text-xl">🚜</span> {language === 'hi' ? 'खेत की जानकारी' : language === 'mr' ? 'शेताची माहिती' : 'Farm Information'}
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-28">{language === 'hi' ? 'आकार:' : language === 'mr' ? 'आकार:' : 'Size:'}</span>
+                    <span className="text-base font-semibold text-gray-800">1 {language === 'hi' ? 'एकड़' : language === 'mr' ? 'एकर' : 'Acre'}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-28">{language === 'hi' ? 'क्षेत्रफल:' : language === 'mr' ? 'क्षेत्रफळ:' : 'Area:'}</span>
+                    <span className="text-base font-semibold text-gray-800">4,047 m²</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-28">{language === 'hi' ? 'स्थान:' : language === 'mr' ? 'स्थान:' : 'Location:'}</span>
+                    <span className="text-base font-semibold text-gray-800">{language === 'hi' ? 'महाराष्ट्र, भारत' : language === 'mr' ? 'महाराष्ट्र, भारत' : 'Maharashtra, India'}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-600 w-28">{language === 'hi' ? 'स्थिति:' : language === 'mr' ? 'स्थिती:' : 'Status:'}</span>
+                    <span className="text-sm font-semibold text-green-600 flex items-center gap-1">
+                      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                      {language === 'hi' ? 'सक्रिय निगरानी' : language === 'mr' ? 'सक्रिय निरीक्षण' : 'Active Monitoring'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {currentData && (
           <>
@@ -371,7 +505,7 @@ const ModernDashboard = () => {
                       </svg>
                       <div>
                         <h4 className="text-lg font-bold text-amber-900 mb-2">{t.dashboard.aiExplanation}</h4>
-                        <p className="text-gray-700 leading-relaxed">{modelInfo.explanation}</p>
+                        <p className="text-gray-700 leading-relaxed">{translateExplanation(modelInfo.explanation, language)}</p>
                       </div>
                     </div>
                   </div>

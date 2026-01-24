@@ -11,8 +11,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { useLanguage } from '../context/LanguageContext';
 
 const ChartsPanel = ({ historyData }) => {
+  const { language } = useLanguage();
   const [timePeriod, setTimePeriod] = useState('week');
 
   const filteredAndFormattedData = useMemo(() => {
@@ -59,7 +61,11 @@ const ChartsPanel = ({ historyData }) => {
     return (
       <div className="backdrop-blur-md bg-gradient-to-br from-purple-100/50 to-pink-100/50 rounded-3xl shadow-xl p-12 text-center border border-white/50">
         <div className="text-8xl mb-4 animate-pulse">📊</div>
-        <p className="text-xl font-bold text-gray-700">No historical data available</p>
+        <p className="text-xl font-bold text-gray-700">
+          {language === 'hi' ? 'कोई एतिहासिक डेटा उपलब्ध नहीं' : 
+           language === 'mr' ? 'कोणताही ऐतिहासिक डेटा उपलब्ध नाही' : 
+           'No historical data available'}
+        </p>
       </div>
     );
   }
@@ -70,7 +76,9 @@ const ChartsPanel = ({ historyData }) => {
       <div className="flex flex-col md:flex-row justify-between items-center mb-8 space-y-4 md:space-y-0">
         <h3 className="text-3xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center">
           <span className="text-4xl mr-3 animate-pulse">📈</span>
-          Historical Trends
+          {language === 'hi' ? 'एतिहासिक रुझान' : 
+           language === 'mr' ? 'ऐतिहासिक ट्रेंड' : 
+           'Historical Trends'}
         </h3>
         <div className="flex gap-3">
           <button
@@ -81,7 +89,7 @@ const ChartsPanel = ({ historyData }) => {
                 : 'bg-white/80 text-gray-700 hover:bg-white'
             }`}
           >
-            📅 1 Day
+            📅 {language === 'hi' ? '1 दिन' : language === 'mr' ? '1 दिवस' : '1 Day'}
           </button>
           <button
             onClick={() => setTimePeriod('week')}
@@ -91,7 +99,7 @@ const ChartsPanel = ({ historyData }) => {
                 : 'bg-white/80 text-gray-700 hover:bg-white'
             }`}
           >
-            📊 1 Week
+            📊 {language === 'hi' ? '1 हफ्ता' : language === 'mr' ? '1 आठवडा' : '1 Week'}
           </button>
           <button
             onClick={() => setTimePeriod('month')}
@@ -109,7 +117,11 @@ const ChartsPanel = ({ historyData }) => {
       {/* Charts */}
       <div className="space-y-8">
         <div className="backdrop-blur-sm bg-white/60 rounded-2xl p-6 shadow-lg">
-          <h4 className="text-xl font-bold text-blue-700 mb-4">💧 Soil Moisture</h4>
+          <h4 className="text-xl font-bold text-blue-700 mb-4">
+            💧 {language === 'hi' ? 'मिट्टी की नमी' : 
+                language === 'mr' ? 'मातीची नमी' : 
+                'Soil Moisture'}
+          </h4>
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={filteredAndFormattedData}>
               <defs>
@@ -128,7 +140,11 @@ const ChartsPanel = ({ historyData }) => {
         </div>
 
         <div className="backdrop-blur-sm bg-white/60 rounded-2xl p-6 shadow-lg">
-          <h4 className="text-xl font-bold text-purple-700 mb-4">🧪 NPK Nutrients</h4>
+          <h4 className="text-xl font-bold text-purple-700 mb-4">
+            🧪 {language === 'hi' ? 'NPK पोषक तत्व' : 
+                 language === 'mr' ? 'NPK पोषक घटक' : 
+                 'NPK Nutrients'}
+          </h4>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={filteredAndFormattedData}>
               <CartesianGrid strokeDasharray="3 3" />
