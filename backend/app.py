@@ -4,6 +4,7 @@ from datetime import datetime
 import traceback
 import sys
 import os
+import requests
 
 # Load environment variables from .env file
 from dotenv import load_dotenv
@@ -1093,6 +1094,214 @@ def get_stress_history():
             'success': False,
             'error': str(e)
         }), 500
+
+
+# ============================================================================
+# EXTERNAL API PROXY ENDPOINTS
+# ============================================================================
+
+@app.route('/api/external/weather', methods=['GET'])
+def proxy_weather_data():
+    """Proxy external weather API - WeatherAPI.com"""
+    try:
+        location = request.args.get('location', 'mumbai')
+        api_key = os.getenv('WEATHER_API_KEY', '079a0828828c4c57af2133300262401')
+        
+        response = requests.get(
+            f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={location}&aqi=no",
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return jsonify({
+                'success': True,
+                'data': {
+                    'temperature': data['current']['temp_c'],
+                    'humidity': data['current']['humidity'],
+                    'condition': data['current']['condition']['text'],
+                    'wind_kph': data['current']['wind_kph'],
+                    'timestamp': datetime.utcnow().isoformat()
+                }
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Weather API returned {response.status_code}'
+            }), response.status_code
+            
+    except requests.exceptions.Timeout:
+        return jsonify({
+            'success': False,
+            'error': 'Weather API timeout'
+        }), 504
+    except Exception as e:
+        print(f"❌ Weather API Error: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/external/soil', methods=['GET'])
+def proxy_soil_data():
+    """Proxy external soil sensor API - AgroMonitoring"""
+    try:
+        lat = float(request.args.get('lat', 18.975))
+        lon = float(request.args.get('lon', 72.826))
+        api_key = os.getenv('AGRO_API_KEY', '97f32bc1c704c19fbb76c734b0c127b6')
+        
+        response = requests.get(
+            f"http://api.agromonitoring.com/agro/1.0/soil?lat={lat}&lon={lon}&appid={api_key}",
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return jsonify({
+                'success': True,
+                'data': {
+                    'moisture': data.get('moisture', 0),
+                    'temperature': data.get('t0', 0),
+                    'timestamp': datetime.utcnow().isoformat()
+                }
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'Soil API returned {response.status_code}'
+            }), response.status_code
+            
+    except requests.exceptions.Timeout:
+        return jsonify({
+            'success': False,
+            'error': 'Soil API timeout'
+        }), 504
+    except Exception as e:
+        print(f"❌ Soil API Error: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/external/npk', methods=['GET'])
+def proxy_npk_data():
+    """Proxy external NPK sensor API"""
+    try:
+        npk_api_url = os.getenv('NPK_API_URL', 'https://npk-agriculture-api.onrender.com')
+        
+        response = requests.get(
+            f"{npk_api_url}/api/npk/latest",
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            data = result.get('data', {})
+            return jsonify({
+                'success': True,
+                'data': {
+                    'nitrogen': data.get('nitrogen', 0),
+                    'phosphorus': data.get('phosphorus', 0),
+                    'potassium': data.get('potassium', 0),
+                    'timestamp': datetime.utcnow().isoformat()
+                }
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': f'NPK API returned {response.status_code}'
+            }), response.status_code
+            
+    except requests.exceptions.Timeout:
+        return jsonify({
+            'success': False,
+            'error': 'NPK API timeout'
+        }), 504
+    except Exception as e:
+        print(f"❌ NPK API Error: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/external/all', methods=['GET'])
+def proxy_all_sensor_data():
+    """Get all external sensor data in one call"""
+    try:
+        location = request.args.get('location', 'mumbai')
+        lat = float(request.args.get('lat', 18.975))
+        lon = float(request.args.get('lon', 72.826))
+        
+        results = {
+            'success': True,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        
+        # Fetch weather data
+        try:
+            weather_api_key = os.getenv('WEATHER_API_KEY', '079a0828828c4c57af2133300262401')
+            weather_response = requests.get(
+                f"http://api.weatherapi.com/v1/current.json?key={weather_api_key}&q={location}&aqi=no",
+                timeout=5
+            )
+            if weather_response.status_code == 200:
+                weather_data = weather_response.json()
+                results['weather'] = {
+                    'temperature': weather_data['current']['temp_c'],
+                    'humidity': weather_data['current']['humidity'],
+                    'condition': weather_data['current']['condition']['text'],
+                    'wind_kph': weather_data['current']['wind_kph']
+                }
+        except Exception as e:
+            results['weather'] = {'error': str(e)}
+        
+        # Fetch soil data
+        try:
+            agro_api_key = os.getenv('AGRO_API_KEY', '97f32bc1c704c19fbb76c734b0c127b6')
+            soil_response = requests.get(
+                f"http://api.agromonitoring.com/agro/1.0/soil?lat={lat}&lon={lon}&appid={agro_api_key}",
+                timeout=5
+            )
+            if soil_response.status_code == 200:
+                soil_data = soil_response.json()
+                results['soil'] = {
+                    'moisture': soil_data.get('moisture', 0),
+                    'temperature': soil_data.get('t0', 0)
+                }
+        except Exception as e:
+            results['soil'] = {'error': str(e)}
+        
+        # Fetch NPK data
+        try:
+            npk_api_url = os.getenv('NPK_API_URL', 'https://npk-agriculture-api.onrender.com')
+            npk_response = requests.get(f"{npk_api_url}/api/npk/latest", timeout=5)
+            if npk_response.status_code == 200:
+                npk_result = npk_response.json()
+                npk_data = npk_result.get('data', {})
+                results['npk'] = {
+                    'nitrogen': npk_data.get('nitrogen', 0),
+                    'phosphorus': npk_data.get('phosphorus', 0),
+                    'potassium': npk_data.get('potassium', 0)
+                }
+        except Exception as e:
+            results['npk'] = {'error': str(e)}
+        
+        return jsonify(results), 200
+        
+    except Exception as e:
+        print(f"❌ Error fetching all sensor data: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 
 if __name__ == '__main__':
     print("\n" + "="*60)

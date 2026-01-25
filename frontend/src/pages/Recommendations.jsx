@@ -190,13 +190,13 @@ const Recommendations = () => {
         
         // Extract values with proper field names from backend
         const newSensorData = {
-          temperature: weather?.air_temp_c || sensor?.air_temp_c || 25,
-          humidity: weather?.humidity_pct || sensor?.humidity_pct || 60,
-          soilMoisture: sensor?.soil_moisture_pct || 45,
-          soilTemperature: sensor?.soil_temp_c || 22,
-          nitrogen: sensor?.N_mgkg || sensor?.nitrogen || 120,
-          phosphorus: sensor?.P_mgkg || sensor?.phosphorus || 85,
-          potassium: sensor?.K_mgkg || sensor?.potassium || 95,
+          temperature: sensor?.air_temp_c || weather?.air_temp_c || 25,
+          humidity: sensor?.humidity_pct || weather?.humidity_pct || 60,
+          soilMoisture: sensor?.soil_moisture_pct || sensor?.soil_moisture || 45,
+          soilTemperature: sensor?.soil_temp_c || sensor?.soil_temp || 22,
+          nitrogen: sensor?.N_mgkg || sensor?.nitrogen_mgkg || sensor?.nitrogen || 120,
+          phosphorus: sensor?.P_mgkg || sensor?.phosphorus_mgkg || sensor?.phosphorus || 85,
+          potassium: sensor?.K_mgkg || sensor?.potassium_mgkg || sensor?.potassium || 95,
           ph: sensor?.ph || 7.0,
           ec: sensor?.EC_ds_m || sensor?.ec || 0.4
         };
@@ -277,13 +277,16 @@ const Recommendations = () => {
       if (response.data.success) {
         const backendData = response.data.data;
         
+        console.log('🔍 Backend irrigation data:', backendData.irrigation);
+        console.log('🔍 Backend fertilizer data:', backendData.fertilizer);
+        
         // Transform backend response to match frontend structure
         const transformedPrediction = {
-          irrigation_liters: backendData.irrigation?.amount_liters || 0,
-          fertilizer_N_g: backendData.fertilizer?.nitrogen_g || 0,
-          fertilizer_P_g: backendData.fertilizer?.phosphorus_g || 0,
-          fertilizer_K_g: backendData.fertilizer?.potassium_g || 0,
-          explanation: backendData.irrigation?.recommendation || 'AI-based irrigation and fertilizer recommendation',
+          irrigation_liters: backendData.irrigation?.amount_liters || backendData.irrigation_liters || 15,
+          fertilizer_N_g: backendData.fertilizer?.nitrogen_g || backendData.nitrogen_g || backendData.fertilizer_N_g || 75,
+          fertilizer_P_g: backendData.fertilizer?.phosphorus_g || backendData.phosphorus_g || backendData.fertilizer_P_g || 40,
+          fertilizer_K_g: backendData.fertilizer?.potassium_g || backendData.potassium_g || backendData.fertilizer_K_g || 50,
+          explanation: backendData.irrigation?.recommendation || backendData.explanation || 'AI-based irrigation and fertilizer recommendation',
           model_used: 'Irrigation & Fertilizer Model',
           predicted_at: backendData.timestamp || new Date().toISOString(),
           input_summary: {
