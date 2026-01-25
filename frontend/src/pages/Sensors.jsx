@@ -13,48 +13,73 @@ const ZONE_LABELS = {
 
 const Sensors = () => {
   const { t } = useLanguage();
-  const [zones, setZones] = useState([]);
-  const [sensorData, setSensorData] = useState({});
   const [loading, setLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
+  
+  // Single sensor data from APIs only
+  const [sensorData, setSensorData] = useState({
+    temperature: null,
+    humidity: null,
+    weatherCondition: null,
+    soilMoisture: null,
+    soilTemperature: null,
+    nitrogen: null,
+    phosphorus: null,
+    potassium: null
+  });
 
   useEffect(() => {
-    loadAllSensors();
+    loadSensorData();
     
     // Auto-refresh every hour
     const interval = setInterval(() => {
-      loadAllSensors();
+      loadSensorData();
     }, 60 * 60 * 1000); // 1 hour
     
     return () => clearInterval(interval);
   }, []);
 
-  const loadAllSensors = async () => {
+  const loadSensorData = async () => {
     setLoading(true);
     try {
-      const zonesResponse = await farmAPI.getZones();
-      const zonesList = zonesResponse.data.zones;
-      setZones(zonesList);
-
-      // Load latest data for all zones
-      const dataPromises = zonesList.map(async (zone) => {
-        try {
-          const response = await farmAPI.getLatest(zone);
-          return { zone, data: response.data.data };
-        } catch (error) {
-          return { zone, data: null };
+      // Fetch weather data
+      const weatherData = await farmAPI.getWeatherData('mumbai');
+      if (weatherData && weatherData.current) {
+        setSensorData(prev => ({
+          ...prev,
+          temperature: weatherData.current.temp_c,
+          humidity: weatherData.current.humidity,
+          weatherCondition: weatherData.current.condition.text
+        }));
+      }
+      
+      // Fetch soil data
+      const soilData = await farmAPI.getSoilData(18.975, 72.826);
+      if (soilData) {
+        const updates = {};
+        if (soilData.moisture !== undefined) {
+          updates.soilMoisture = Math.round(soilData.moisture * 100);
         }
-      });
-
-      const results = await Promise.all(dataPromises);
-      const dataMap = {};
-      results.forEach(({ zone, data }) => {
-        dataMap[zone] = data;
-      });
-      setSensorData(dataMap);
+        if (soilData.t0 !== undefined) {
+          updates.soilTemperature = (soilData.t0 - 273.15).toFixed(1);
+        }
+        setSensorData(prev => ({ ...prev, ...updates }));
+      }
+      
+      // Fetch NPK data
+      const npkData = await farmAPI.getNPKData();
+      if (npkData) {
+        setSensorData(prev => ({
+          ...prev,
+          nitrogen: npkData.nitrogen,
+          phosphorus: npkData.phosphorus,
+          potassium: npkData.potassium
+        }));
+      }
+      
       setLastUpdate(new Date());
     } catch (error) {
-      console.error('Error loading sensors:', error);
+      console.error('Error loading sensor data:', error);
     } finally {
       setLoading(false);
     }
@@ -103,121 +128,146 @@ const Sensors = () => {
             <p className="text-xl text-gray-600">{t.sensors.loadingSensors}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {zones.map((zone) => {
-              const data = sensorData[zone];
-              const sensor = data?.sensor || {};
-              const weather = data?.weather || {};
-
-              return (
-                <div
-                  key={zone}
-                  className="backdrop-blur-lg bg-white/50 rounded-2xl shadow-xl p-6 border-2 border-white/60 hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-                >
-                  {/* Zone Header */}
-                  <div className="mb-4 pb-4 border-b-2 border-gray-200">
-                    <h3 className="text-xl font-black text-gray-800 flex items-center">
-                      <span className="text-2xl mr-2">📍</span>
-                      {ZONE_LABELS[zone] || zone}
-                    </h3>
-                    {sensor.timestamp && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {t.sensors.updated}: {formatTimestamp(sensor.timestamp)}
+          <div className="max-w-6xl mx-auto space-y-6">
+            
+            {/* Card 1: Live Weather */}
+            <div className="backdrop-blur-lg bg-white/50 rounded-2xl shadow-xl p-6 border-2 border-white/60">
+              <div className="flex items-center mb-6 pb-4 border-b-2 border-gray-200">
+                <span className="text-3xl mr-3">🌤️</span>
+                <h3 className="text-2xl font-black text-gray-800">Live Weather Data</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Temperature */}
+                <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-xl p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-amber-700 mb-1">🌡️ Temperature</p>
+                      <p className="text-4xl font-black text-amber-900">
+                        {sensorData.temperature ? formatNumber(sensorData.temperature, 1) : '--'}°C
                       </p>
-                    )}
-                  </div>
-
-                  {/* Sensor Readings */}
-                  <div className="space-y-3">
-                    {/* Soil Moisture */}
-                    <div className="bg-gradient-to-r from-blue-100 to-cyan-100 rounded-lg p-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-semibold text-blue-700">💧 {t.sensors.moisture}</span>
-                        <span className="text-lg font-black text-blue-800">
-                          {formatNumber(sensor.soil_moisture, 1)}%
-                        </span>
-                      </div>
-                      <div className="mt-2 h-1.5 bg-blue-200 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-blue-600 rounded-full transition-all duration-1000"
-                          style={{ width: `${sensor.soil_moisture || 0}%` }}
-                        ></div>
-                      </div>
-                    </div>
-
-                    {/* Temperature */}
-                    <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-lg p-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-semibold text-orange-700">🌡️ {t.sensors.temperature}</span>
-                        <span className="text-lg font-black text-orange-800">
-                          {formatNumber(sensor.temperature, 1)}°C
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Humidity */}
-                    <div className="bg-gradient-to-r from-teal-100 to-green-100 rounded-lg p-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-semibold text-teal-700">💨 {t.sensors.humidity}</span>
-                        <span className="text-lg font-black text-teal-800">
-                          {formatNumber(sensor.humidity, 0)}%
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* NPK Nutrients */}
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="bg-purple-100 rounded-lg p-2 text-center">
-                        <p className="text-xs font-semibold text-purple-700">N</p>
-                        <p className="text-sm font-black text-purple-800">{formatNumber(sensor.nitrogen, 0)}</p>
-                      </div>
-                      <div className="bg-yellow-100 rounded-lg p-2 text-center">
-                        <p className="text-xs font-semibold text-yellow-700">P</p>
-                        <p className="text-sm font-black text-yellow-800">{formatNumber(sensor.phosphorus, 0)}</p>
-                      </div>
-                      <div className="bg-pink-100 rounded-lg p-2 text-center">
-                        <p className="text-xs font-semibold text-pink-700">K</p>
-                        <p className="text-sm font-black text-pink-808">{formatNumber(sensor.potassium, 0)}</p>
-                      </div>
-                    </div>
-
-                    {/* pH */}
-                    <div className="bg-green-100 rounded-lg p-3 text-center">
-                      <p className="text-xs font-semibold text-green-700">{t.sensors.phLevel}</p>
-                      <p className="text-lg font-black text-green-800">{formatNumber(sensor.ph, 2)}</p>
-                    </div>
-
-                    {/* Status Badge */}
-                    <div className="text-center pt-2">
-                      <span className="inline-block px-4 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
-                        ✓ {t.sensors.active}
-                      </span>
+                      {sensorData.weatherCondition && (
+                        <p className="text-sm text-amber-600 mt-2">☁️ {sensorData.weatherCondition}</p>
+                      )}
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
 
-        {/* Summary Stats */}
-        {!loading && zones.length > 0 && (
-          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="backdrop-blur-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl p-6 text-center">
-              <p className="text-sm opacity-90">{t.sensors.totalSensors}</p>
-              <p className="text-4xl font-black">{zones.length}</p>
+                {/* Humidity */}
+                <div className="bg-gradient-to-r from-blue-100 to-cyan-100 rounded-xl p-6">
+                  <div>
+                    <p className="text-sm font-semibold text-blue-700 mb-1">💧 Humidity</p>
+                    <p className="text-4xl font-black text-blue-900 mb-3">
+                      {sensorData.humidity ? formatNumber(sensorData.humidity, 0) : '--'}%
+                    </p>
+                    {sensorData.humidity && (
+                      <div className="h-2 bg-blue-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-blue-600 rounded-full transition-all duration-1000"
+                          style={{ width: `${sensorData.humidity}%` }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="backdrop-blur-lg bg-gradient-to-br from-green-500 to-green-600 text-white rounded-2xl p-6 text-center">
-              <p className="text-sm opacity-90">{t.sensors.activeZones}</p>
-              <p className="text-4xl font-black">{zones.length}</p>
+
+            {/* Card 2: Live Soil Info */}
+            <div className="backdrop-blur-lg bg-white/50 rounded-2xl shadow-xl p-6 border-2 border-white/60">
+              <div className="flex items-center mb-6 pb-4 border-b-2 border-gray-200">
+                <span className="text-3xl mr-3">🌱</span>
+                <h3 className="text-2xl font-black text-gray-800">Live Soil Info</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Soil Moisture */}
+                <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-6">
+                  <div>
+                    <p className="text-sm font-semibold text-green-700 mb-1">💦 Soil Moisture</p>
+                    <p className="text-4xl font-black text-green-900 mb-3">
+                      {sensorData.soilMoisture ? formatNumber(sensorData.soilMoisture, 0) : '--'}%
+                    </p>
+                    {sensorData.soilMoisture && (
+                      <div className="h-2 bg-green-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-green-600 rounded-full transition-all duration-1000"
+                          style={{ width: `${sensorData.soilMoisture}%` }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Soil Temperature */}
+                <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-xl p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-orange-700 mb-1">🌡️ Soil Temperature</p>
+                      <p className="text-4xl font-black text-orange-900">
+                        {sensorData.soilTemperature ? formatNumber(sensorData.soilTemperature, 1) : '--'}°C
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="backdrop-blur-lg bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-2xl p-6 text-center">
-              <p className="text-sm opacity-90">{t.sensors.soilTypes}</p>
-              <p className="text-4xl font-black">5</p>
+
+            {/* Card 3: NPK Nutrients */}
+            <div className="backdrop-blur-lg bg-white/50 rounded-2xl shadow-xl p-6 border-2 border-white/60">
+              <div className="flex items-center mb-6 pb-4 border-b-2 border-gray-200">
+                <span className="text-3xl mr-3">🧪</span>
+                <h3 className="text-2xl font-black text-gray-800">NPK Nutrients</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Nitrogen */}
+                <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-6 text-center">
+                  <div className="w-16 h-16 bg-purple-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-3xl font-black text-purple-700">N</span>
+                  </div>
+                  <p className="text-sm font-semibold text-purple-700 mb-2">Nitrogen</p>
+                  <p className="text-3xl font-black text-purple-900">
+                    {sensorData.nitrogen ? formatNumber(sensorData.nitrogen, 0) : '--'}
+                  </p>
+                  <p className="text-xs text-purple-600 mt-1">mg/kg</p>
+                </div>
+
+                {/* Phosphorus */}
+                <div className="bg-gradient-to-r from-orange-100 to-red-100 rounded-xl p-6 text-center">
+                  <div className="w-16 h-16 bg-orange-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-3xl font-black text-orange-700">P</span>
+                  </div>
+                  <p className="text-sm font-semibold text-orange-700 mb-2">Phosphorus</p>
+                  <p className="text-3xl font-black text-orange-900">
+                    {sensorData.phosphorus ? formatNumber(sensorData.phosphorus, 0) : '--'}
+                  </p>
+                  <p className="text-xs text-orange-600 mt-1">mg/kg</p>
+                </div>
+
+                {/* Potassium */}
+                <div className="bg-gradient-to-r from-pink-100 to-rose-100 rounded-xl p-6 text-center">
+                  <div className="w-16 h-16 bg-pink-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span className="text-3xl font-black text-pink-700">K</span>
+                  </div>
+                  <p className="text-sm font-semibold text-pink-700 mb-2">Potassium</p>
+                  <p className="text-3xl font-black text-pink-900">
+                    {sensorData.potassium ? formatNumber(sensorData.potassium, 0) : '--'}
+                  </p>
+                  <p className="text-xs text-pink-600 mt-1">mg/kg</p>
+                </div>
+              </div>
             </div>
-            <div className="backdrop-blur-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-2xl p-6 text-center">
-              <p className="text-sm opacity-90">{t.sensors.cropTypes}</p>
-              <p className="text-4xl font-black">3</p>
+
+            {/* Refresh Button */}
+            <div className="text-center">
+              <button
+                onClick={loadSensorData}
+                disabled={loading}
+                className="px-8 py-4 bg-amber-600 text-white text-lg rounded-xl font-bold hover:bg-amber-700 disabled:opacity-50 transition-all shadow-lg hover:shadow-xl"
+              >
+                {loading ? '⏳ Refreshing...' : '🔄 Refresh Data'}
+              </button>
             </div>
           </div>
         )}

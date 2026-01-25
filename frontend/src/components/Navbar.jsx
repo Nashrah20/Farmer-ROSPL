@@ -43,7 +43,6 @@ const Navbar = () => {
   
   const navItems = [
     { path: '/', name: t.nav.dashboard, icon: '■' },
-    { path: '/analytics', name: t.nav.analytics, icon: '▲' },
     { path: '/recommendations', name: t.nav.recommendations, icon: '◆' },
     { path: '/image-analysis', name: t.nav.imageAnalysis, icon: '●' },
     { path: '/sensors', name: t.nav.sensors, icon: '◉' },

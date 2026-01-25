@@ -347,8 +347,7 @@ const ImageAnalysis = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          image: base64Image,
-          zone_id: localStorage.getItem('selectedZone') || 'zone_001'
+          image: base64Image
         }),
         signal: controller.signal
       });

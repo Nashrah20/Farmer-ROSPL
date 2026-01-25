@@ -18,6 +18,8 @@ from utils.mongo import MongoDBClient
 # from ml.train import train_models
 from ml.predict import make_prediction
 from ml.advanced_predict import AdvancedPredictor
+from predict_crop import CropPredictor
+from predict_irrigation_fertilizer import IrrigationFertilizerPredictor
 from ml.reinforcement_learning import rl_system
 from ml.image_analysis import image_analyzer
 from services.external_services import WeatherService, MarketPriceService, GovernmentSchemesService
@@ -38,6 +40,22 @@ schemes_service = GovernmentSchemesService()
 voice_assistant = VoiceAssistant()
 advanced_predictor = AdvancedPredictor(Config.ML_MODEL_PATH, Config.ML_FEATURES_PATH)
 resource_tracker = ResourceTracker(mongo_client)
+
+# Initialize Crop Predictor (new ML model)
+try:
+    crop_predictor = CropPredictor()
+    print("✅ Crop Predictor initialized successfully")
+except Exception as e:
+    print(f"⚠️  Warning: Crop Predictor not initialized: {e}")
+    crop_predictor = None
+
+# Initialize Irrigation & Fertilizer Predictor
+try:
+    irrigation_fertilizer_predictor = IrrigationFertilizerPredictor()
+    print("✅ Irrigation & Fertilizer Predictor initialized successfully")
+except Exception as e:
+    print(f"⚠️  Warning: Irrigation & Fertilizer Predictor not initialized: {e}")
+    irrigation_fertilizer_predictor = None
 
 # Health check endpoint
 @app.route('/api/health', methods=['GET'])
@@ -194,53 +212,91 @@ def train_model():
             'traceback': traceback.format_exc()
         }), 500
 
-# Predict endpoint
+# Predict endpoint - NEW: Uses Crop Prediction ML Model
 @app.route('/api/predict', methods=['POST'])
 def predict():
-    """Make prediction for a zone"""
+    """Make crop prediction based on sensor data"""
     try:
         data = request.get_json()
         
-        if not data or 'zone_id' not in data:
+        if not data:
             return jsonify({
                 'success': False,
-                'error': 'zone_id is required in request body'
+                'error': 'Request body is required'
             }), 400
         
-        zone_id = data['zone_id']
-        
-        # Check if model exists
-        if not os.path.exists(Config.ML_MODEL_PATH):
+        # Check if new crop predictor is available
+        if crop_predictor is None:
             return jsonify({
                 'success': False,
-                'error': 'Model not trained yet. Please call /api/train first.'
-            }), 400
+                'error': 'Crop prediction model not available. Please train the model first.'
+            }), 503
         
-        # Fetch latest data for the zone
-        latest_data = mongo_client.get_latest_data(zone_id)
+        # Determine current season based on month
+        current_month = datetime.now().month
+        if 6 <= current_month <= 10:
+            season = 'kharif'  # Monsoon season
+        elif 11 <= current_month <= 3:
+            season = 'rabi'    # Winter season
+        else:
+            season = 'zaid'    # Summer season
         
-        if not latest_data['sensor'] or not latest_data['weather']:
-            return jsonify({
-                'success': False,
-                'error': f'No data available for zone_id: {zone_id}'
-            }), 404
+        # Allow season override from request
+        if 'season' in data:
+            season = data['season']
         
-        # Make prediction
-        prediction_result = make_prediction(
-            Config.ML_MODEL_PATH,
-            Config.ML_FEATURES_PATH,
-            latest_data['sensor'],
-            latest_data['weather']
+        # Extract sensor data from request
+        air_temp = data.get('temperature', 25.0)
+        humidity = data.get('humidity', 60.0)
+        soil_moisture = data.get('soil_moisture', 45.0)
+        soil_temp = data.get('soil_temp', air_temp)  # Default to air temp if not provided
+        nitrogen = data.get('nitrogen', 100.0)
+        phosphorus = data.get('phosphorus', 60.0)
+        potassium = data.get('potassium', 80.0)
+        soil_type = data.get('soil_type', 'black_soil')  # Default to black soil
+        
+        # Make crop prediction using ML model
+        prediction_result = crop_predictor.predict_crop(
+            air_temp=air_temp,
+            humidity=humidity,
+            soil_moisture=soil_moisture,
+            soil_temp=soil_temp,
+            nitrogen=nitrogen,
+            phosphorus=phosphorus,
+            potassium=potassium,
+            season=season,
+            soil_type=soil_type
         )
         
-        return jsonify({
+        # Format response for frontend compatibility
+        response = {
             'success': True,
-            'zone_id': zone_id,
-            'prediction': prediction_result
-        }), 200
+            'data': {
+                'action': f"Plant {prediction_result['predicted_crop']}",
+                'confidence': prediction_result['confidence'],
+                'predicted_crop': prediction_result['predicted_crop'],
+                'top_3_crops': prediction_result['top_3_crops'],
+                'explanation': f"Based on current conditions (Temp: {air_temp}°C, Humidity: {humidity}%, Season: {season}), we recommend planting {prediction_result['predicted_crop']} with {prediction_result['confidence_percent']} confidence.",
+                'predictions': {
+                    'crop': prediction_result['predicted_crop'],
+                    'alternatives': [crop['crop'] for crop in prediction_result['top_3_crops'][1:]],
+                    'confidence': prediction_result['confidence_percent']
+                },
+                'input_summary': prediction_result['input_summary'],
+                'season': season
+            }
+        }
         
+        return jsonify(response), 200
+        
+    except ValueError as e:
+        # Handle validation errors (e.g., invalid season)
+        return jsonify({
+            'success': False,
+            'error': f'Validation error: {str(e)}'
+        }), 400
     except Exception as e:
-        print(f"Error during prediction: {str(e)}")
+        print(f"Error during crop prediction: {str(e)}")
         traceback.print_exc()
         return jsonify({
             'success': False,
@@ -278,6 +334,100 @@ def save_action():
         return jsonify({
             'success': False,
             'error': str(e)
+        }), 500
+
+# Irrigation & Fertilizer Prediction Endpoint
+@app.route('/api/predict-irrigation-fertilizer', methods=['POST'])
+def predict_irrigation_fertilizer():
+    """Predict irrigation and fertilizer requirements based on sensor data"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'Request body is required'
+            }), 400
+        
+        # Check if predictor is available
+        if irrigation_fertilizer_predictor is None:
+            return jsonify({
+                'success': False,
+                'error': 'Irrigation & Fertilizer prediction model not available. Please train the model first.'
+            }), 503
+        
+        # Extract required parameters from request
+        soil_moisture = data.get('soil_moisture')
+        soil_temp = data.get('soil_temp')
+        air_temp = data.get('air_temp')
+        humidity = data.get('humidity')
+        
+        # Validate required parameters
+        if soil_moisture is None or soil_temp is None or air_temp is None or humidity is None:
+            return jsonify({
+                'success': False,
+                'error': 'Required parameters: soil_moisture, soil_temp, air_temp, humidity'
+            }), 400
+        
+        # Extract optional parameters with defaults
+        wind = data.get('wind', 0)
+        rainfall = data.get('rainfall', 0)
+        ph = data.get('ph', 7.0)
+        ec = data.get('ec', 0.4)
+        nitrogen = data.get('nitrogen', 50)
+        phosphorus = data.get('phosphorus', 20)
+        potassium = data.get('potassium', 150)
+        ndvi = data.get('ndvi', 0.5)
+        leaf_health = data.get('leaf_health', 85)
+        stress_level = data.get('stress_level', 5)
+        soil_type = data.get('soil_type', 'coarse')
+        crop = data.get('crop', 'wheat')
+        crop_stage = data.get('crop_stage', 'Growing')
+        region = data.get('region', 'NorthMaha')
+        
+        # Make prediction
+        result = irrigation_fertilizer_predictor.predict(
+            soil_moisture=soil_moisture,
+            soil_temp=soil_temp,
+            air_temp=air_temp,
+            humidity=humidity,
+            wind=wind,
+            rainfall=rainfall,
+            ph=ph,
+            ec=ec,
+            nitrogen=nitrogen,
+            phosphorus=phosphorus,
+            potassium=potassium,
+            ndvi=ndvi,
+            leaf_health=leaf_health,
+            stress_level=stress_level,
+            soil_type=soil_type,
+            crop=crop,
+            crop_stage=crop_stage,
+            region=region
+        )
+        
+        # Check if prediction has error
+        if 'error' in result:
+            return jsonify({
+                'success': False,
+                'error': result['error'],
+                'message': result.get('message', 'Prediction failed')
+            }), 500
+        
+        # Return successful prediction
+        return jsonify({
+            'success': True,
+            'data': result
+        }), 200
+        
+    except Exception as e:
+        print(f"Error during irrigation/fertilizer prediction: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'traceback': traceback.format_exc()
         }), 500
 
 # Advanced Prediction Endpoint

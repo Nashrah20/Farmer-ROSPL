@@ -1,0 +1,330 @@
+{
+  "irrigation": {
+    "model_name": "RandomForest",
+    "score": {
+      "MAE": 1.6575507081740464,
+      "RMSE": 3.0756668910869367,
+      "R2": 0.7810112590426536
+    },
+    "importance": [
+      {
+        "feature": "soil_moisture_pct",
+        "importance": 0.38718955531161636
+      },
+      {
+        "feature": "soil_type_encoded",
+        "importance": 0.28239752780847416
+      },
+      {
+        "feature": "region_encoded",
+        "importance": 0.11913182388824867
+      },
+      {
+        "feature": "soil_temp_c",
+        "importance": 0.028147315267389495
+      },
+      {
+        "feature": "air_temp_c",
+        "importance": 0.02792898611768398
+      },
+      {
+        "feature": "humidity_pct",
+        "importance": 0.02645681972497093
+      },
+      {
+        "feature": "ph",
+        "importance": 0.022387777954663894
+      },
+      {
+        "feature": "crop_encoded",
+        "importance": 0.017868334923217384
+      },
+      {
+        "feature": "wind_kmph",
+        "importance": 0.013209423786513944
+      },
+      {
+        "feature": "K_mgkg",
+        "importance": 0.013047287124406495
+      },
+      {
+        "feature": "EC_ds_m",
+        "importance": 0.011244359766363085
+      },
+      {
+        "feature": "NDVI",
+        "importance": 0.011232943358496486
+      },
+      {
+        "feature": "N_mgkg",
+        "importance": 0.011151162727312033
+      },
+      {
+        "feature": "stress_level",
+        "importance": 0.009296990427094731
+      },
+      {
+        "feature": "P_mgkg",
+        "importance": 0.008774411831024587
+      },
+      {
+        "feature": "leaf_health_score",
+        "importance": 0.00642293135972989
+      },
+      {
+        "feature": "rainfall_mm",
+        "importance": 0.002573592707926587
+      },
+      {
+        "feature": "crop_stage_encoded",
+        "importance": 0.001538755914867387
+      }
+    ]
+  },
+  "nitrogen": {
+    "model_name": "RandomForest",
+    "score": {
+      "MAE": 0.37736252239712564,
+      "RMSE": 2.259449198003949,
+      "R2": 0.4179492262222888
+    },
+    "importance": [
+      {
+        "feature": "N_mgkg",
+        "importance": 0.4593991468326458
+      },
+      {
+        "feature": "NDVI",
+        "importance": 0.13269119093430512
+      },
+      {
+        "feature": "EC_ds_m",
+        "importance": 0.048256090090574306
+      },
+      {
+        "feature": "humidity_pct",
+        "importance": 0.04539770017127423
+      },
+      {
+        "feature": "wind_kmph",
+        "importance": 0.03995129330271508
+      },
+      {
+        "feature": "soil_moisture_pct",
+        "importance": 0.03955208848948915
+      },
+      {
+        "feature": "K_mgkg",
+        "importance": 0.03891171292661525
+      },
+      {
+        "feature": "stress_level",
+        "importance": 0.03312588461372616
+      },
+      {
+        "feature": "ph",
+        "importance": 0.027590792006696875
+      },
+      {
+        "feature": "soil_temp_c",
+        "importance": 0.026626640004777106
+      },
+      {
+        "feature": "leaf_health_score",
+        "importance": 0.024744095880142432
+      },
+      {
+        "feature": "air_temp_c",
+        "importance": 0.024213002276518812
+      },
+      {
+        "feature": "P_mgkg",
+        "importance": 0.019734893154085376
+      },
+      {
+        "feature": "crop_stage_encoded",
+        "importance": 0.018103036438123103
+      },
+      {
+        "feature": "region_encoded",
+        "importance": 0.010994568261137991
+      },
+      {
+        "feature": "crop_encoded",
+        "importance": 0.006654698706432546
+      },
+      {
+        "feature": "rainfall_mm",
+        "importance": 0.0021669398950439666
+      },
+      {
+        "feature": "soil_type_encoded",
+        "importance": 0.00188622601569675
+      }
+    ]
+  },
+  "phosphorus": {
+    "model_name": "RandomForest",
+    "score": {
+      "MAE": 0.1772266512967936,
+      "RMSE": 1.0419008217440686,
+      "R2": 0.26867717231092836
+    },
+    "importance": [
+      {
+        "feature": "P_mgkg",
+        "importance": 0.3605251138844969
+      },
+      {
+        "feature": "NDVI",
+        "importance": 0.1681589009800969
+      },
+      {
+        "feature": "EC_ds_m",
+        "importance": 0.05191332466202073
+      },
+      {
+        "feature": "soil_moisture_pct",
+        "importance": 0.04653905602476703
+      },
+      {
+        "feature": "N_mgkg",
+        "importance": 0.04481896969209699
+      },
+      {
+        "feature": "wind_kmph",
+        "importance": 0.044195085608367116
+      },
+      {
+        "feature": "humidity_pct",
+        "importance": 0.04221469529935815
+      },
+      {
+        "feature": "ph",
+        "importance": 0.037383528081614395
+      },
+      {
+        "feature": "soil_temp_c",
+        "importance": 0.035599558284404434
+      },
+      {
+        "feature": "stress_level",
+        "importance": 0.03392147121943821
+      },
+      {
+        "feature": "K_mgkg",
+        "importance": 0.03319230890561092
+      },
+      {
+        "feature": "air_temp_c",
+        "importance": 0.032484272219954306
+      },
+      {
+        "feature": "leaf_health_score",
+        "importance": 0.03133528750168151
+      },
+      {
+        "feature": "crop_stage_encoded",
+        "importance": 0.019073538884166883
+      },
+      {
+        "feature": "region_encoded",
+        "importance": 0.00835081331736756
+      },
+      {
+        "feature": "crop_encoded",
+        "importance": 0.006250800255224672
+      },
+      {
+        "feature": "soil_type_encoded",
+        "importance": 0.002251174473965327
+      },
+      {
+        "feature": "rainfall_mm",
+        "importance": 0.0017921007053680494
+      }
+    ]
+  },
+  "potassium": {
+    "model_name": "RandomForest",
+    "score": {
+      "MAE": 0.03886345084797847,
+      "RMSE": 0.44797913702546605,
+      "R2": 0.35579387278017804
+    },
+    "importance": [
+      {
+        "feature": "K_mgkg",
+        "importance": 0.3519267820820449
+      },
+      {
+        "feature": "EC_ds_m",
+        "importance": 0.11646269233300842
+      },
+      {
+        "feature": "wind_kmph",
+        "importance": 0.07532563965178614
+      },
+      {
+        "feature": "leaf_health_score",
+        "importance": 0.06811090797468
+      },
+      {
+        "feature": "humidity_pct",
+        "importance": 0.05747670294604006
+      },
+      {
+        "feature": "NDVI",
+        "importance": 0.0554549242269472
+      },
+      {
+        "feature": "ph",
+        "importance": 0.05042868938114153
+      },
+      {
+        "feature": "stress_level",
+        "importance": 0.04437815138462252
+      },
+      {
+        "feature": "soil_moisture_pct",
+        "importance": 0.04407147308047442
+      },
+      {
+        "feature": "soil_temp_c",
+        "importance": 0.04403670400325459
+      },
+      {
+        "feature": "air_temp_c",
+        "importance": 0.03153514167464352
+      },
+      {
+        "feature": "N_mgkg",
+        "importance": 0.028855024739217732
+      },
+      {
+        "feature": "P_mgkg",
+        "importance": 0.020185309621611552
+      },
+      {
+        "feature": "crop_encoded",
+        "importance": 0.010591037716731876
+      },
+      {
+        "feature": "crop_stage_encoded",
+        "importance": 0.0005997736983468567
+      },
+      {
+        "feature": "rainfall_mm",
+        "importance": 0.0003649376474024348
+      },
+      {
+        "feature": "region_encoded",
+        "importance": 0.00019610783804637204
+      },
+      {
+        "feature": "soil_type_encoded",
+        "importance": 0.0
+      }
+    ]
+  }
+}

@@ -220,12 +220,50 @@ const Dashboard = () => {
       return;
     }
 
+    if (!latestData || !latestData.sensor) {
+      setError('Sensor data not available. Please wait for data to load.');
+      return;
+    }
+
     setPredicting(true);
     setError(null);
 
     try {
-      const response = await farmAPI.predict(selectedZone);
-      setPrediction(response.data.prediction);
+      // Get zone info to extract soil type
+      const zoneInfo = getZoneInfo(selectedZone);
+      const sensorData = latestData.sensor;
+      const weatherData = latestData.weather;
+      
+      // Map soil type to backend format
+      const soilTypeMap = {
+        'Coarse Soil': 'coarse',
+        'Black Soil': 'black',
+        'Laterite Soil': 'laterite',
+        'Alluvial Soil': 'alluvial',
+        'Yellow-Brown Soil': 'yellow-brown'
+      };
+      
+      const soilType = soilTypeMap[zoneInfo.soilType] || 'black';
+      
+      // Prepare prediction request with actual sensor data
+      const predictionData = {
+        temperature: weatherData?.air_temp_c || sensorData?.air_temp_c || 25,
+        humidity: weatherData?.humidity_pct || sensorData?.humidity_pct || 60,
+        soil_moisture: sensorData?.soil_moisture_pct || 45,
+        soil_temp: sensorData?.soil_temp_c || 22,
+        nitrogen: sensorData?.N_mgkg || 120,
+        phosphorus: sensorData?.P_mgkg || 85,
+        potassium: sensorData?.K_mgkg || 95,
+        soil_type: soilType,
+        season: getCurrentSeason()
+      };
+      
+      console.log('🌾 Crop prediction request:', predictionData);
+      
+      const response = await farmAPI.predictWithData(predictionData);
+      console.log('✅ Crop prediction response:', response.data);
+      
+      setPrediction(response.data);
     } catch (err) {
       console.error('Error getting prediction:', err);
       setError(
@@ -237,22 +275,32 @@ const Dashboard = () => {
     }
   };
 
+  // Helper function to get current season
+  const getCurrentSeason = () => {
+    const month = new Date().getMonth() + 1; // 1-12
+    if (month >= 6 && month <= 10) return 'kharif';  // Monsoon
+    if (month >= 11 || month <= 3) return 'rabi';     // Winter
+    return 'zaid';  // Summer
+  };
+
   // Approve action
   const handleApproveAction = async () => {
-    if (!prediction) return;
+    if (!prediction || !prediction.data) return;
 
     setApproving(true);
     setError(null);
 
+    const predictionData = prediction.data;
+
     const actionData = {
       zone_id: selectedZone,
       timestamp: new Date().toISOString(),
-      irrigation_liters: prediction.predictions.irrigation_liters,
-      fertilizer_N_g: prediction.predictions.fertilizer_N_g,
-      fertilizer_P_g: prediction.predictions.fertilizer_P_g,
-      fertilizer_K_g: prediction.predictions.fertilizer_K_g,
-      model_used: prediction.model_used,
-      explanation: prediction.explanation,
+      predicted_crop: predictionData.predicted_crop,
+      confidence: predictionData.confidence,
+      top_3_crops: predictionData.top_3_crops,
+      action: predictionData.action,
+      explanation: predictionData.explanation,
+      season: predictionData.season
     };
 
     try {

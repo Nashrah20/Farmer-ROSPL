@@ -121,7 +121,7 @@ export const savePendingAction = async (actionData) => {
     await db.pendingActions.add({
       ...actionData,
       timestamp: new Date().toISOString(),
-      synced: false,
+      synced: 0, // Use 0 instead of false for IndexedDB compatibility
     });
     console.log('Pending action saved');
   } catch (error) {
@@ -132,7 +132,8 @@ export const savePendingAction = async (actionData) => {
 // Get pending actions
 export const getPendingActions = async () => {
   try {
-    return await db.pendingActions.where('synced').equals(false).toArray();
+    // Fix: Use numeric value 0 instead of boolean false for IndexedDB query
+    return await db.pendingActions.where('synced').equals(0).toArray();
   } catch (error) {
     console.error('Error getting pending actions:', error);
     return [];
@@ -142,7 +143,7 @@ export const getPendingActions = async () => {
 // Mark action as synced
 export const markActionSynced = async (actionId) => {
   try {
-    await db.pendingActions.update(actionId, { synced: true });
+    await db.pendingActions.update(actionId, { synced: 1 }); // Use 1 instead of true
   } catch (error) {
     console.error('Error marking action as synced:', error);
   }

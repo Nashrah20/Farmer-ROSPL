@@ -5,7 +5,6 @@ import { LanguageProvider } from './context/LanguageContext'
 import { SidebarProvider, useSidebar } from './context/SidebarContext'
 import Navbar from './components/Navbar'
 import ModernDashboard from './pages/ModernDashboard'
-import Analytics from './pages/Analytics'
 import Recommendations from './pages/Recommendations'
 import Help from './pages/Help'
 import Sensors from './pages/Sensors'
@@ -54,7 +53,6 @@ const AppContent = () => {
       }`}>
         <Routes>
           <Route path="/" element={<ModernDashboard />} />
-          <Route path="/analytics" element={<Analytics />} />
           <Route path="/recommendations" element={<Recommendations />} />
           <Route path="/image-analysis" element={<ImageAnalysis />} />
           <Route path="/help" element={<Help />} />
