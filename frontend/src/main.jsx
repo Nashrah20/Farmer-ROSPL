@@ -1,14 +1,17 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { LanguageProvider } from './context/LanguageContext'
 import { SidebarProvider, useSidebar } from './context/SidebarContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import ModernDashboard from './pages/ModernDashboard'
 import Recommendations from './pages/Recommendations'
 import Help from './pages/Help'
 import Sensors from './pages/Sensors'
 import ImageAnalysis from './pages/ImageAnalysis'
+import Login from './pages/Login'
+import Register from './pages/Register'
 import { initOfflineSystem } from './offline/init'
 import './index.css'
 
@@ -42,21 +45,31 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
   });
 }
 
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/login" />;
+};
+
 const AppContent = () => {
   const { sidebarOpen } = useSidebar();
+  const { user } = useAuth();
   
   return (
     <div className="min-h-screen">
-      <Navbar />
-      <main className={`transition-all duration-300 pt-16 lg:pt-0 ${
-        sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'
+      {user && <Navbar />}
+      <main className={`transition-all duration-300 ${
+        user ? (sidebarOpen ? 'lg:ml-64 pt-16 lg:pt-0' : 'lg:ml-20 pt-16 lg:pt-0') : ''
       }`}>
         <Routes>
-          <Route path="/" element={<ModernDashboard />} />
-          <Route path="/recommendations" element={<Recommendations />} />
-          <Route path="/image-analysis" element={<ImageAnalysis />} />
-          <Route path="/help" element={<Help />} />
-          <Route path="/sensors" element={<Sensors />} />
+          <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+          <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
+          
+          <Route path="/" element={<ProtectedRoute><ModernDashboard /></ProtectedRoute>} />
+          <Route path="/recommendations" element={<ProtectedRoute><Recommendations /></ProtectedRoute>} />
+          <Route path="/image-analysis" element={<ProtectedRoute><ImageAnalysis /></ProtectedRoute>} />
+          <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+          <Route path="/sensors" element={<ProtectedRoute><Sensors /></ProtectedRoute>} />
         </Routes>
       </main>
     </div>
@@ -66,11 +79,13 @@ const AppContent = () => {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <LanguageProvider>
-      <SidebarProvider>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </SidebarProvider>
+      <AuthProvider>
+        <SidebarProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </SidebarProvider>
+      </AuthProvider>
     </LanguageProvider>
   </React.StrictMode>,
 )

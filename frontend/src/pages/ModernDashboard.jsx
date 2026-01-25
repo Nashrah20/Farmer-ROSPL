@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { farmAPI } from '../api/api';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * SIMPLIFIED DASHBOARD
@@ -10,13 +11,15 @@ import { useLanguage } from '../context/LanguageContext';
 
 const ModernDashboard = () => {
   const { t, language } = useLanguage();
+  const { user } = useAuth();
   
   const [predictions, setPredictions] = useState(null);
   const [modelInfo, setModelInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [selectedSoilType, setSelectedSoilType] = useState('black_soil');
+  // Initialize with user's soil type if logged in
+  const [selectedSoilType, setSelectedSoilType] = useState(user?.soil_type || 'black_soil');
   
   // Soil type options
   const soilTypes = [
@@ -26,6 +29,13 @@ const ModernDashboard = () => {
     { value: 'alluvial_soil', label: { en: 'Alluvial Soil', hi: 'जलोढ़ मिट्टी', mr: 'गाळाची माती' } },
     { value: 'saline_alkaline_soil', label: { en: 'Saline Soil', hi: 'लवणीय मिट्टी', mr: 'क्षारीय माती' } }
   ];
+
+  // Update soil type when user changes
+  useEffect(() => {
+    if (user?.soil_type) {
+      setSelectedSoilType(user.soil_type);
+    }
+  }, [user]);
   
   // All sensor data comes from APIs only
   const [sensorData, setSensorData] = useState({

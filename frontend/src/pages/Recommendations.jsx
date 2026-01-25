@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { farmAPI } from '../api/api';
 import RecommendationCard from '../components/RecommendationCard';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 
 // Zone display name mapping
 const ZONE_LABELS = {
@@ -22,14 +23,29 @@ const ZONE_LABELS = {
   'YS3': '🌾 Yellow-Brown Soil - Tur (NorthMaha)',
 };
 
+// Helper function to convert user's soil_type to prediction format
+const convertSoilType = (userSoilType) => {
+  const soilMap = {
+    'black_soil': 'black',
+    'red_soil': 'red',
+    'laterite_soil': 'laterite',
+    'alluvial_soil': 'alluvial',
+    'saline_alkaline_soil': 'saline'
+  };
+  return soilMap[userSoilType] || 'coarse';
+};
+
 const Recommendations = () => {
   const { t, language, getZoneLabel } = useLanguage();
+  const { user } = useAuth();
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   
-  // Soil type and crop selection only
-  const [selectedSoilType, setSelectedSoilType] = useState('coarse');
+  // Soil type and crop selection only - Initialize with user's soil type
+  const [selectedSoilType, setSelectedSoilType] = useState(
+    user?.soil_type ? convertSoilType(user.soil_type) : 'coarse'
+  );
   const [selectedCrop, setSelectedCrop] = useState('wheat');
   const [selectedZone, setSelectedZone] = useState('CS1'); // Default zone for fetching sensor data
   
@@ -46,6 +62,13 @@ const Recommendations = () => {
     ec: '...'
   });
   const [sensorLoading, setSensorLoading] = useState(true);
+
+  // Update soil type when user changes
+  useEffect(() => {
+    if (user?.soil_type) {
+      setSelectedSoilType(convertSoilType(user.soil_type));
+    }
+  }, [user]);
 
   // Translation function for explanation text
   const translateExplanation = (text) => {

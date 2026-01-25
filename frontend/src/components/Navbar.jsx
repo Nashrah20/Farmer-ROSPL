@@ -1,20 +1,28 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useSidebar } from '../context/SidebarContext';
+import { useAuth } from '../context/AuthContext';
 import { useOfflineStatus } from '../hooks/useOfflineStatus';
 import config from '../config';
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { sidebarOpen, setSidebarOpen } = useSidebar();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const { t, cycleLanguage, getNextLanguageName, language } = useLanguage();
+  const { user, logout } = useAuth();
   const [backendStatus, setBackendStatus] = React.useState({ isLive: false, responseTime: null });
   const [isChecking, setIsChecking] = React.useState(false);
   
   // OFFLINE-FIRST: Monitor online/offline status
   const { isOnline, isOffline } = useOfflineStatus();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const checkBackendStatus = async () => {
     setIsChecking(true);
@@ -235,11 +243,29 @@ const Navbar = () => {
             </div>
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold truncate">{t.nav.farmerDashboard}</p>
+                <p className="text-sm font-semibold truncate">{user?.username || t.nav.farmerDashboard}</p>
                 <p className="text-xs text-amber-100 opacity-80 truncate">{t.nav.welcomeBack}</p>
               </div>
             )}
           </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 hover:bg-red-500/20 text-red-200 hover:text-red-100 ${
+              !sidebarOpen ? 'justify-center' : ''
+            }`}
+            title={!sidebarOpen ? (language === 'hi' ? 'लॉगआउट' : language === 'mr' ? 'लॉगआउट' : 'Logout') : ''}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            {sidebarOpen && (
+              <span className="font-medium text-sm">
+                {language === 'hi' ? 'लॉगआउट' : language === 'mr' ? 'लॉगआउट' : 'Logout'}
+              </span>
+            )}
+          </button>
         </div>
       </aside>
 

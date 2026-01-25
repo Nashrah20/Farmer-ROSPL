@@ -26,10 +26,19 @@ from ml.image_analysis import image_analyzer
 from services.external_services import WeatherService, MarketPriceService, GovernmentSchemesService
 from services.voice_assistant import VoiceAssistant
 from services.resource_tracker import ResourceTracker
+from services.user_service import UserService
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+# Enable CORS with credentials support for authentication
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:3001", "http://localhost:3000", "https://farmer-hackathon-x9m8.onrender.com"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    }
+})
 
 # Initialize MongoDB client
 mongo_client = MongoDBClient()
@@ -41,6 +50,7 @@ schemes_service = GovernmentSchemesService()
 voice_assistant = VoiceAssistant()
 advanced_predictor = AdvancedPredictor(Config.ML_MODEL_PATH, Config.ML_FEATURES_PATH)
 resource_tracker = ResourceTracker(mongo_client)
+user_service = UserService(mongo_client)
 
 # Initialize Crop Predictor (new ML model)
 try:
@@ -1090,6 +1100,184 @@ def get_stress_history():
         }), 200
         
     except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+# ============================================================================
+# USER AUTHENTICATION ENDPOINTS
+# ============================================================================
+
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    """Register a new user"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'Request body is required'
+            }), 400
+        
+        username = data.get('username')
+        password = data.get('password')
+        soil_type = data.get('soil_type')
+        
+        # Validate required fields
+        if not username or not password or not soil_type:
+            return jsonify({
+                'success': False,
+                'error': 'Username, password, and soil_type are required'
+            }), 400
+        
+        # Validate soil type
+        valid_soil_types = ['black_soil', 'red_soil', 'laterite_soil', 'alluvial_soil', 'saline_alkaline_soil']
+        if soil_type not in valid_soil_types:
+            return jsonify({
+                'success': False,
+                'error': f'Invalid soil_type. Must be one of: {", ".join(valid_soil_types)}'
+            }), 400
+        
+        # Create user
+        user, error = user_service.create_user(username, password, soil_type)
+        
+        if error:
+            return jsonify({
+                'success': False,
+                'error': error
+            }), 400
+        
+        return jsonify({
+            'success': True,
+            'message': 'User registered successfully',
+            'user': {
+                'username': user['username'],
+                'soil_type': user['soil_type']
+            }
+        }), 201
+        
+    except Exception as e:
+        print(f"Error during registration: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    """Login a user"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'Request body is required'
+            }), 400
+        
+        username = data.get('username')
+        password = data.get('password')
+        
+        if not username or not password:
+            return jsonify({
+                'success': False,
+                'error': 'Username and password are required'
+            }), 400
+        
+        # Authenticate user
+        user, error = user_service.authenticate_user(username, password)
+        
+        if error:
+            return jsonify({
+                'success': False,
+                'error': error
+            }), 401
+        
+        return jsonify({
+            'success': True,
+            'message': 'Login successful',
+            'user': {
+                'username': user['username'],
+                'soil_type': user['soil_type']
+            }
+        }), 200
+        
+    except Exception as e:
+        print(f"Error during login: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/auth/user/<username>', methods=['GET'])
+def get_user_profile(username):
+    """Get user profile"""
+    try:
+        user = user_service.get_user(username)
+        
+        if not user:
+            return jsonify({
+                'success': False,
+                'error': 'User not found'
+            }), 404
+        
+        return jsonify({
+            'success': True,
+            'user': user
+        }), 200
+        
+    except Exception as e:
+        print(f"Error fetching user profile: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/auth/update-soil-type', methods=['PUT'])
+def update_user_soil_type():
+    """Update user's soil type preference"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'Request body is required'
+            }), 400
+        
+        username = data.get('username')
+        soil_type = data.get('soil_type')
+        
+        if not username or not soil_type:
+            return jsonify({
+                'success': False,
+                'error': 'Username and soil_type are required'
+            }), 400
+        
+        # Update soil type
+        success = user_service.update_soil_type(username, soil_type)
+        
+        if not success:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to update soil type'
+            }), 400
+        
+        return jsonify({
+            'success': True,
+            'message': 'Soil type updated successfully'
+        }), 200
+        
+    except Exception as e:
+        print(f"Error updating soil type: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)

@@ -152,6 +152,16 @@ export const farmAPI = {
 
   // Irrigation & Fertilizer Prediction
   predictIrrigationFertilizer: (data) => api.post('/predict-irrigation-fertilizer', data),
+
+  // Authentication APIs
+  register: (userData) => api.post('/auth/register', userData),
+  
+  login: (credentials) => api.post('/auth/login', credentials),
+  
+  getUserProfile: (username) => api.get(`/auth/user/${username}`),
+  
+  updateSoilType: (username, soilType) => 
+    api.put('/auth/update-soil-type', { username, soil_type: soilType }),
 };
 
 export default api;
