@@ -18,24 +18,6 @@ const ModernDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isSpeaking, setIsSpeaking] = useState(false);
-  // Initialize with user's soil type if logged in
-  const [selectedSoilType, setSelectedSoilType] = useState(user?.soil_type || 'black_soil');
-  
-  // Soil type options
-  const soilTypes = [
-    { value: 'black_soil', label: { en: 'Black Soil', hi: 'काली मिट्टी', mr: 'काळी माती' } },
-    { value: 'red_soil', label: { en: 'Red Soil', hi: 'लाल मिट्टी', mr: 'लाल माती' } },
-    { value: 'laterite_soil', label: { en: 'Laterite Soil', hi: 'लैटेराइट मिट्टी', mr: 'लॅटेराइट माती' } },
-    { value: 'alluvial_soil', label: { en: 'Alluvial Soil', hi: 'जलोढ़ मिट्टी', mr: 'गाळाची माती' } },
-    { value: 'saline_alkaline_soil', label: { en: 'Saline Soil', hi: 'लवणीय मिट्टी', mr: 'क्षारीय माती' } }
-  ];
-
-  // Update soil type when user changes
-  useEffect(() => {
-    if (user?.soil_type) {
-      setSelectedSoilType(user.soil_type);
-    }
-  }, [user]);
   
   // All sensor data comes from APIs only
   const [sensorData, setSensorData] = useState({
@@ -46,7 +28,8 @@ const ModernDashboard = () => {
     soilTemperature: null,
     nitrogen: null,
     phosphorus: null,
-    potassium: null
+    potassium: null,
+    soilType: null
   });
 
   // Text-to-speech function
@@ -256,22 +239,36 @@ const ModernDashboard = () => {
     try {
       console.log('🧪 Fetching NPK data...');
       const response = await farmAPI.getNPKData();
-      console.log('✅ NPK data received:', response);
+      console.log('✅ NPK data received:', JSON.stringify(response, null, 2));
       
       // getNPKData already returns the data object directly
       const data = response || {};
       
-      // Update sensor data with NPK values
+      // Update sensor data with NPK values and soil type
       if (data && (data.nitrogen !== undefined || data.phosphorus !== undefined || data.potassium !== undefined)) {
+        // Check multiple possible locations for soil type
+        let soilType = data.soil_type || 
+                      data.soilType || 
+                      data.soil_name ||
+                      data.soilName ||
+                      (data.data && data.data.soil_type) ||
+                      (data.data && data.data.soilType) ||
+                      null;
+        
+        console.log('🔍 All data keys:', Object.keys(data));
+        console.log('🏜️ Extracted Soil Type:', soilType);
+        
         setSensorData(prev => ({
           ...prev,
-          nitrogen: data.nitrogen,
-          phosphorus: data.phosphorus,
-          potassium: data.potassium
+          nitrogen: data.nitrogen || data.n || data.N,
+          phosphorus: data.phosphorus || data.p || data.P,
+          potassium: data.potassium || data.k || data.K,
+          soilType: soilType
         }));
         console.log('🧪 Nitrogen:', data.nitrogen, 'kg/ha');
         console.log('🧪 Phosphorus:', data.phosphorus, 'kg/ha');
         console.log('🧪 Potassium:', data.potassium, 'kg/ha');
+        console.log('🏜️ Final Soil Type:', soilType);
       }
     } catch (error) {
       console.error('❌ Error fetching NPK data:', error);
@@ -319,7 +316,7 @@ const ModernDashboard = () => {
         nitrogen: parseFloat(sensorData.nitrogen) || 120.0,
         phosphorus: parseFloat(sensorData.phosphorus) || 85.0,
         potassium: parseFloat(sensorData.potassium) || 95.0,
-        soil_type: selectedSoilType
+        soil_type: sensorData.soilType || 'black_soil'
       };
 
       console.log('📤 Sending prediction request:', requestData);
@@ -546,24 +543,6 @@ const ModernDashboard = () => {
           </div>
         </div>
 
-        {/* Soil Type Selection */}
-        <div className="mb-8 max-w-md mx-auto">
-          <label className="block text-lg font-bold text-amber-900 mb-3 text-center">
-            {language === 'hi' ? '🏜️ मिट्टी का प्रकार चुनें' : language === 'mr' ? '🏜️ मातीचा प्रकार निवडा' : '🏜️ Select Soil Type'}
-          </label>
-          <select
-            value={selectedSoilType}
-            onChange={(e) => setSelectedSoilType(e.target.value)}
-            className="w-full px-4 py-3 text-lg font-semibold bg-white border-2 border-amber-300 rounded-xl shadow-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 cursor-pointer hover:border-amber-400 transition"
-          >
-            {soilTypes.map((soil) => (
-              <option key={soil.value} value={soil.value}>
-                {soil.label[language] || soil.label.en}
-              </option>
-            ))}
-          </select>
-        </div>
-
         {/* AI Recommendations Button */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-4">
@@ -608,6 +587,23 @@ const ModernDashboard = () => {
         {/* Predictions */}
         {predictions && predictions.crop && (
               <>
+                {/* Soil Type Display */}
+                <div className="mb-6 max-w-md mx-auto">
+                  <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl p-6 shadow-xl border-2 border-amber-200">
+                    <div className="flex items-center justify-center gap-3">
+                      <span className="text-3xl">🏜️</span>
+                      <div className="text-center">
+                        <p className="text-sm font-semibold text-amber-700 mb-1">
+                          {language === 'hi' ? 'मिट्टी का प्रकार' : language === 'mr' ? 'मातीचा प्रकार' : 'Soil Type'}
+                        </p>
+                        <p className="text-2xl font-black text-amber-900 uppercase">
+                          {sensorData.soilType ? sensorData.soilType.replace(/_/g, ' ') : 'Black Soil'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Crop Recommendation Banner */}
                 <div className="mb-6 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-2xl">
                   <div className="flex items-center justify-between flex-wrap gap-4">

@@ -12,22 +12,14 @@ const Register = () => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    confirmPassword: '',
-    soil_type: 'black_soil'
+    confirmPassword: ''
   });
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const soilTypes = [
-    { value: 'black_soil', label: { en: 'Black Soil', hi: 'काली मिट्टी', mr: 'काळी माती' } },
-    { value: 'red_soil', label: { en: 'Red Soil', hi: 'लाल मिट्टी', mr: 'लाल माती' } },
-    { value: 'laterite_soil', label: { en: 'Laterite Soil', hi: 'लैटेराइट मिट्टी', mr: 'लॅटेराइट माती' } },
-    { value: 'alluvial_soil', label: { en: 'Alluvial Soil', hi: 'जलोढ़ मिट्टी', mr: 'गाळाची माती' } },
-    { value: 'saline_alkaline_soil', label: { en: 'Saline/Alkaline Soil', hi: 'लवणीय/क्षारीय मिट्टी', mr: 'क्षारीय माती' } }
-  ];
+  const { cycleLanguage, getNextLanguageName } = useLanguage();
 
   const handleChange = (e) => {
     setFormData({
@@ -63,7 +55,7 @@ const Register = () => {
       if (response.data.success) {
         // Auto-login after registration
         login(response.data.user);
-        navigate('/dashboard');
+        navigate('/');
       } else {
         setError(response.data.error || 'Registration failed');
       }
@@ -79,10 +71,17 @@ const Register = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="flex justify-center">
-            <div className="text-6xl">🌾</div>
+          <div className="flex justify-end mb-4">
+            <button
+              type="button"
+              onClick={cycleLanguage}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+            >
+              <span>🌐</span>
+              <span>{getNextLanguageName()}</span>
+            </button>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">
             {language === 'hi' ? 'नया खाता बनाएं' : language === 'mr' ? 'नवीन खाते तयार करा' : 'Create your account'}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
@@ -177,33 +176,6 @@ const Register = () => {
                   )}
                 </button>
               </div>
-            </div>
-
-            <div>
-              <label htmlFor="soil_type" className="block text-sm font-medium text-gray-700 mb-1">
-                🌱 {language === 'hi' ? 'मिट्टी का प्रकार' : language === 'mr' ? 'मातीचा प्रकार' : 'Soil Type'}
-              </label>
-              <select
-                id="soil_type"
-                name="soil_type"
-                required
-                className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                value={formData.soil_type}
-                onChange={handleChange}
-              >
-                {soilTypes.map((soil) => (
-                  <option key={soil.value} value={soil.value}>
-                    {soil.label[language] || soil.label.en}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-1 text-xs text-gray-500">
-                {language === 'hi' 
-                  ? 'यह आपके सभी अनुशंसाओं में डिफ़ॉल्ट रूप से चुना जाएगा' 
-                  : language === 'mr' 
-                  ? 'हे तुमच्या सर्व शिफारशींमध्ये डीफॉल्टनुसार निवडले जाईल' 
-                  : 'This will be auto-selected in all your recommendations'}
-              </p>
             </div>
           </div>
 

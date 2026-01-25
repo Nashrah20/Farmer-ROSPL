@@ -42,10 +42,7 @@ const Recommendations = () => {
   const [loading, setLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   
-  // Soil type and crop selection only - Initialize with user's soil type
-  const [selectedSoilType, setSelectedSoilType] = useState(
-    user?.soil_type ? convertSoilType(user.soil_type) : 'coarse'
-  );
+  // Crop selection only
   const [selectedCrop, setSelectedCrop] = useState('wheat');
   const [selectedZone, setSelectedZone] = useState('CS1'); // Default zone for fetching sensor data
   
@@ -59,16 +56,10 @@ const Recommendations = () => {
     phosphorus: '...',
     potassium: '...',
     ph: '...',
-    ec: '...'
+    ec: '...',
+    soilType: null
   });
   const [sensorLoading, setSensorLoading] = useState(true);
-
-  // Update soil type when user changes
-  useEffect(() => {
-    if (user?.soil_type) {
-      setSelectedSoilType(convertSoilType(user.soil_type));
-    }
-  }, [user]);
 
   // Translation function for explanation text
   const translateExplanation = (text) => {
@@ -221,7 +212,8 @@ const Recommendations = () => {
           phosphorus: sensor?.P_mgkg || sensor?.phosphorus_mgkg || sensor?.phosphorus || 85,
           potassium: sensor?.K_mgkg || sensor?.potassium_mgkg || sensor?.potassium || 95,
           ph: sensor?.ph || 7.0,
-          ec: sensor?.EC_ds_m || sensor?.ec || 0.4
+          ec: sensor?.EC_ds_m || sensor?.ec || 0.4,
+          soilType: null // Will be fetched from NPK API
         };
         
         console.log('✅ Extracted sensor data:', newSensorData);
@@ -229,6 +221,38 @@ const Recommendations = () => {
       } else {
         console.warn('⚠️ No sensor data found, using defaults');
         setDefaultSensorData();
+      }
+      
+      // Fetch NPK and soil type from external API
+      try {
+        const npkRes = await fetch('https://npk-agriculture-api.onrender.com/api/npk/latest');
+        const npkData = await npkRes.json();
+        console.log('🧪 NPK API full response:', JSON.stringify(npkData, null, 2));
+        
+        if (npkData) {
+          // Check multiple possible locations for soil type
+          let soilType = npkData.soil_type || 
+                        npkData.soilType || 
+                        npkData.soil_name ||
+                        npkData.soilName ||
+                        (npkData.data && npkData.data.soil_type) ||
+                        (npkData.data && npkData.data.soilType) ||
+                        null;
+          
+          console.log('🔍 Extracted soil type:', soilType);
+          console.log('🔍 All NPK data keys:', Object.keys(npkData));
+          
+          setSensorData(prev => ({
+            ...prev,
+            nitrogen: npkData.nitrogen || npkData.n || npkData.N || prev.nitrogen,
+            phosphorus: npkData.phosphorus || npkData.p || npkData.P || prev.phosphorus,
+            potassium: npkData.potassium || npkData.k || npkData.K || prev.potassium,
+            soilType: soilType
+          }));
+          console.log('✅ Updated with NPK data, soil type:', soilType);
+        }
+      } catch (npkError) {
+        console.error('❌ NPK fetch error:', npkError);
       }
     } catch (error) {
       console.error('❌ Error fetching sensor data:', error);
@@ -270,7 +294,7 @@ const Recommendations = () => {
         potassium: sensorData.potassium,
         ph: sensorData.ph,
         ec: sensorData.ec,
-        soil_type: selectedSoilType,
+        soil_type: sensorData.soilType || 'black_soil',
         crop: selectedCrop
       });
 
@@ -289,7 +313,7 @@ const Recommendations = () => {
         ndvi: 0.6,
         leaf_health: 85,
         stress_level: 5,
-        soil_type: selectedSoilType,
+        soil_type: sensorData.soilType || 'black_soil',
         crop: selectedCrop,
         crop_stage: 'Growing',
         region: 'WestMaha'
@@ -345,7 +369,7 @@ const Recommendations = () => {
 
     try {
       await farmAPI.saveAction({
-        zone_id: `${selectedSoilType}_${selectedCrop}`,
+        zone_id: `${sensorData.soilType || 'unknown'}_${selectedCrop}`,
         timestamp: new Date().toISOString(),
         irrigation_liters: prediction.irrigation_liters,
         fertilizer_N_g: prediction.fertilizer_N_g,
@@ -376,36 +400,16 @@ const Recommendations = () => {
 
         {/* Get Recommendations Section */}
         <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-amber-200 p-6 mb-6">
-          {/* Selection Dropdowns - Only Soil Type and Crop */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            {/* Soil Type Dropdown */}
-            <div>
-              <label className="block text-sm font-semibold text-amber-900 mb-2">
-                🌱 {language === 'hi' ? 'मिट्टी का प्रकार' : language === 'mr' ? 'मातीचा प्रकार' : 'Soil Type'}
-              </label>
-              <select
-                value={selectedSoilType}
-                onChange={(e) => setSelectedSoilType(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white text-base"
-              >
-                <option value="coarse">{language === 'hi' ? 'मोटी मिट्टी' : language === 'mr' ? 'जाड माती' : 'Coarse Soil'}</option>
-                <option value="black">{language === 'hi' ? 'काली मिट्टी' : language === 'mr' ? 'काळी माती' : 'Black Soil'}</option>
-                <option value="laterite">{language === 'hi' ? 'लैटराइट मिट्टी' : language === 'mr' ? 'लॅटराइट माती' : 'Laterite Soil'}</option>
-                <option value="alluvial">{language === 'hi' ? 'जलोढ़ मिट्टी' : language === 'mr' ? 'जलोड माती' : 'Alluvial Soil'}</option>
-                <option value="yellow-brown">{language === 'hi' ? 'पीली-भूरी मिट्टी' : language === 'mr' ? 'पिवळी-तपकिरी माती' : 'Yellow-Brown Soil'}</option>
-              </select>
-            </div>
-
-            {/* Crop Dropdown */}
-            <div>
-              <label className="block text-sm font-semibold text-amber-900 mb-2">
-                🌾 {language === 'hi' ? 'फसल' : language === 'mr' ? 'पीक' : 'Crop'}
-              </label>
-              <select
-                value={selectedCrop}
-                onChange={(e) => setSelectedCrop(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white text-base"
-              >
+          {/* Crop Selection */}
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-amber-900 mb-2">
+              🌾 {language === 'hi' ? 'फसल' : language === 'mr' ? 'पीक' : 'Crop'}
+            </label>
+            <select
+              value={selectedCrop}
+              onChange={(e) => setSelectedCrop(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white text-base"
+            >
                 <option value="wheat">{language === 'hi' ? 'गेहूं' : language === 'mr' ? 'गहू' : 'Wheat'}</option>
                 <option value="rice">{language === 'hi' ? 'चावल' : language === 'mr' ? 'तांदूळ' : 'Rice'}</option>
                 <option value="cotton">{language === 'hi' ? 'कपास' : language === 'mr' ? 'कापूस' : 'Cotton'}</option>
@@ -421,7 +425,6 @@ const Recommendations = () => {
                 <option value="cashew">{language === 'hi' ? 'काजू' : language === 'mr' ? 'काजू' : 'Cashew'}</option>
                 <option value="ragi">{language === 'hi' ? 'रागी' : language === 'mr' ? 'नाचणी' : 'Ragi'}</option>
               </select>
-            </div>
           </div>
 
           {/* Current Sensor Data Display */}
@@ -473,6 +476,21 @@ const Recommendations = () => {
                 </span>
               </div>
             </div>
+            
+            {/* Soil Type Display */}
+            {sensorData.soilType && (
+              <div className="mt-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-3 border border-amber-200">
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-lg">🏜️</span>
+                  <span className="text-sm text-amber-700 font-semibold">
+                    {language === 'hi' ? 'मिट्टी का प्रकार:' : language === 'mr' ? 'मातीचा प्रकार:' : 'Soil Type:'}
+                  </span>
+                  <span className="text-lg font-black text-amber-900 uppercase">
+                    {sensorData.soilType.replace(/_/g, ' ')}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="text-center">
@@ -513,7 +531,7 @@ const Recommendations = () => {
           onApprove={handleApprove}
           approving={false}
           zoneInfo={{
-            soilType: selectedSoilType.charAt(0).toUpperCase() + selectedSoilType.slice(1) + ' Soil',
+            soilType: sensorData.soilType ? sensorData.soilType.replace(/_/g, ' ').toUpperCase() : 'Unknown',
             crop: selectedCrop.charAt(0).toUpperCase() + selectedCrop.slice(1),
             region: 'West Maharashtra'
           }}

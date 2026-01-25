@@ -14,7 +14,8 @@ const Sensors = () => {
     soilTemperature: 18.8,
     nitrogen: 87.5,
     phosphorus: 32.9,
-    potassium: 167.6
+    potassium: 167.6,
+    soilType: null
   });
 
   useEffect(() => {
@@ -53,6 +54,37 @@ const Sensors = () => {
           soilMoisture: Math.round(soilData.moisture * 100),
           soilTemperature: soilData.t10 ? (soilData.t10 - 273.15).toFixed(1) : prev.soilTemperature
         }));
+      }
+      
+      // Fetch NPK and soil type
+      try {
+        const npkRes = await fetch('https://npk-agriculture-api.onrender.com/api/npk/latest');
+        const npkData = await npkRes.json();
+        console.log('NPK full response:', JSON.stringify(npkData, null, 2));
+        
+        if (npkData) {
+          // Check multiple possible locations for soil type
+          let soilType = npkData.soil_type || 
+                        npkData.soilType || 
+                        npkData.soil_name ||
+                        npkData.soilName ||
+                        (npkData.data && npkData.data.soil_type) ||
+                        (npkData.data && npkData.data.soilType) ||
+                        null;
+          
+          console.log('🔍 NPK data keys:', Object.keys(npkData));
+          console.log('🏜️ Extracted soil type:', soilType);
+          
+          setSensorData(prev => ({
+            ...prev,
+            nitrogen: npkData.nitrogen || npkData.n || npkData.N || prev.nitrogen,
+            phosphorus: npkData.phosphorus || npkData.p || npkData.P || prev.phosphorus,
+            potassium: npkData.potassium || npkData.k || npkData.K || prev.potassium,
+            soilType: soilType
+          }));
+        }
+      } catch (npkError) {
+        console.error('NPK fetch error:', npkError);
       }
       
       setLastUpdate(new Date());
@@ -231,6 +263,21 @@ const Sensors = () => {
                 </div>
               </div>
             </div>
+
+            {/* Soil Type Display */}
+            {sensorData.soilType && (
+              <div className="backdrop-blur-lg bg-white/50 rounded-2xl shadow-xl p-6 border-2 border-white/60">
+                <div className="flex items-center mb-6 pb-4 border-b-2 border-gray-200">
+                  <span className="text-3xl mr-3">🏜️</span>
+                  <h3 className="text-2xl font-black text-gray-800">Soil Type</h3>
+                </div>
+                <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-xl p-6 text-center">
+                  <p className="text-4xl font-black text-amber-900 uppercase">
+                    {sensorData.soilType.replace(/_/g, ' ')}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Refresh Button */}
             <div className="text-center">

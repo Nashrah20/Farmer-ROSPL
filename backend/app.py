@@ -1134,18 +1134,18 @@ def register():
         
         username = data.get('username')
         password = data.get('password')
-        soil_type = data.get('soil_type')
+        soil_type = data.get('soil_type', 'black_soil')  # Default to black_soil if not provided
         
         # Validate required fields
-        if not username or not password or not soil_type:
+        if not username or not password:
             return jsonify({
                 'success': False,
-                'error': 'Username, password, and soil_type are required'
+                'error': 'Username and password are required'
             }), 400
         
-        # Validate soil type
+        # Validate soil type if provided
         valid_soil_types = ['black_soil', 'red_soil', 'laterite_soil', 'alluvial_soil', 'saline_alkaline_soil']
-        if soil_type not in valid_soil_types:
+        if soil_type and soil_type not in valid_soil_types:
             return jsonify({
                 'success': False,
                 'error': f'Invalid soil_type. Must be one of: {", ".join(valid_soil_types)}'
