@@ -37,22 +37,39 @@ print("="*70)
 # STEP 1: LOAD DATASET
 # ============================================================================
 print("\n📂 STEP 1: Loading Dataset...")
-dataset_path = "Data/maharashtra_5_soil_types_crop_dataset_100k.csv"
+# Try improved dataset first, fall back to original
+dataset_paths = [
+    "Data/maharashtra_5_soil_types_improved_100k.csv",
+    "Data/maharashtra_5_soil_types_crop_dataset_100k.csv"
+]
 
-try:
-    df = pd.read_csv(dataset_path)
-    print(f"✅ Dataset loaded successfully!")
-    print(f"   Rows: {len(df):,}")
-    print(f"   Columns: {df.shape[1]}")
-    print(f"\n📊 Dataset Preview:")
-    print(df.head())
-    print(f"\n📈 Dataset Info:")
-    print(df.info())
-    print(f"\n🌱 Unique Crops: {df['crop'].nunique()}")
-    print(f"   Crop List: {sorted(df['crop'].unique())}")
-except FileNotFoundError:
-    print(f"❌ Error: Dataset not found at {dataset_path}")
+df = None
+dataset_path = None
+for path in dataset_paths:
+    try:
+        df = pd.read_csv(path)
+        dataset_path = path
+        print(f"✅ Dataset loaded: {path}")
+        break
+    except FileNotFoundError:
+        continue
+
+if df is None:
+    print(f"❌ Error: No dataset found. Tried: {dataset_paths}")
     exit(1)
+
+print(f"   Rows: {len(df):,}")
+print(f"   Columns: {df.shape[1]}")
+print(f"\n📊 Dataset Preview:")
+print(df.head())
+
+print(f"\n🌱 Unique Crops: {df['crop'].nunique()}")
+print(f"   Crop List: {sorted(df['crop'].unique())}")
+
+print(f"\n🏜️ Unique Soil Types: {df['soil_type'].nunique()}")
+print(f"   Soil Types: {sorted(df['soil_type'].unique())}")
+print("\n📊 Soil Type Distribution:")
+print(df['soil_type'].value_counts())
 
 # ============================================================================
 # STEP 2: DATA PREPROCESSING
@@ -256,6 +273,30 @@ preprocessing_data = {
 with open(preprocessing_path, 'wb') as f:
     pickle.dump(preprocessing_data, f)
 print(f"   ✅ Preprocessing saved: {preprocessing_path}")
+
+# Display soil feature importance
+if hasattr(best_model, 'feature_importances_'):
+    print(f"\n🌱 SOIL TYPE FEATURE IMPORTANCE:")
+    print("="*70)
+    importances = best_model.feature_importances_
+    feature_names = X_encoded.columns
+    
+    soil_features = [(name, importances[i]) for i, name in enumerate(feature_names) 
+                     if name.startswith('soil_') and name not in ['soil_moisture (%)', 'soil_temp (°C)']]
+    soil_features.sort(key=lambda x: x[1], reverse=True)
+    
+    total_soil_importance = sum([imp for _, imp in soil_features])
+    print(f"Total soil type importance: {total_soil_importance:.4f} ({total_soil_importance*100:.2f}%)")
+    print("\nIndividual soil features:")
+    for name, imp in soil_features:
+        bar = '█' * int(imp * 200) if imp > 0 else '▁'
+        print(f"  {name:30} {imp:6.4f} {bar}")
+    
+    if total_soil_importance < 0.05:
+        print("\n⚠️  WARNING: Low soil importance detected!")
+        print("   Consider using an improved dataset with better soil-crop relationships.")
+    else:
+        print(f"\n✅ Good! Soil type features have {total_soil_importance*100:.1f}% importance")
 
 # ============================================================================
 # STEP 7: DETAILED CLASSIFICATION REPORT

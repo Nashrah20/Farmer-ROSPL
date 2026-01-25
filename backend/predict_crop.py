@@ -11,6 +11,37 @@ import numpy as np
 import pandas as pd
 from typing import Dict, List, Tuple
 
+# Soil-Crop Suitability Matrix (based on agricultural knowledge for Maharashtra)
+# This helps adjust predictions when the model has low soil type importance
+# Crops: bajra, cotton, gram, maize, onion, pomegranate, rice, soybean, sugarcane, wheat
+SOIL_CROP_SUITABILITY = {
+    'black_soil': {
+        'high': ['cotton', 'soybean', 'gram', 'wheat'],  # Black soil is ideal for these
+        'medium': ['sugarcane', 'maize', 'onion', 'pomegranate'],
+        'low': ['rice', 'bajra']  # Less suitable for black soil
+    },
+    'red_soil': {
+        'high': ['gram', 'bajra', 'maize'],  # Red soil suits these crops well
+        'medium': ['cotton', 'wheat', 'onion', 'soybean'],
+        'low': ['rice', 'sugarcane', 'pomegranate']  # Not ideal for red soil
+    },
+    'laterite_soil': {
+        'high': ['rice', 'bajra'],  # Laterite soil is best for rice
+        'medium': ['maize', 'sugarcane'],
+        'low': ['cotton', 'wheat', 'soybean', 'gram', 'pomegranate', 'onion']  # Poor for most crops
+    },
+    'alluvial_soil': {
+        'high': ['rice', 'sugarcane', 'wheat', 'maize'],  # Alluvial is very fertile
+        'medium': ['cotton', 'soybean', 'onion', 'gram'],
+        'low': ['bajra', 'pomegranate']  # Less suitable
+    },
+    'saline_alkaline_soil': {
+        'high': ['bajra', 'soybean'],  # Salt-tolerant crops
+        'medium': ['wheat', 'cotton', 'maize'],
+        'low': ['rice', 'sugarcane', 'gram', 'pomegranate', 'onion']  # Salt-sensitive
+    }
+}
+
 class CropPredictor:
     """
     Crop prediction class that handles loading model and making predictions.
@@ -64,7 +95,7 @@ class CropPredictor:
             phosphorus: Phosphorus content (mg/kg)
             potassium: Potassium content (mg/kg)
             season: Season name (e.g., 'kharif', 'rabi', 'zaid')
-            soil_type: Soil type (e.g., 'black_soil', 'red_soil', 'laterite_soil', 'alluvial_soil', 'saline_soil')
+            soil_type: Soil type (e.g., 'black_soil', 'red_soil', 'laterite_soil', 'alluvial_soil', 'saline_alkaline_soil')
         
         Returns:
             Scaled numpy array ready for prediction
@@ -87,7 +118,8 @@ class CropPredictor:
         
         # One-hot encode soil type
         for soil_col in self.soil_columns:
-            soil_name = soil_col.replace('soil_', '')
+            # Extract soil type name from column name (e.g., 'soil_black_soil' -> 'black_soil')
+            soil_name = soil_col.replace('soil_', '', 1)  # Remove only the first 'soil_' prefix
             input_data[soil_col] = 1 if soil_type.lower() == soil_name.lower() else 0
         
         # Ensure columns match training data
@@ -97,6 +129,46 @@ class CropPredictor:
         input_scaled = self.scaler.transform(input_data)
         
         return input_scaled
+    
+    def _adjust_predictions_for_soil(self, probabilities: np.ndarray, soil_type: str) -> np.ndarray:
+        """
+        Adjust prediction probabilities based on soil-crop suitability.
+        Crops with high suitability get a boost, low suitability get a heavy penalty.
+        
+        Args:
+            probabilities: Original model probabilities for each crop class
+            soil_type: The soil type for adjustment
+            
+        Returns:
+            Adjusted probabilities (normalized to sum to 1)
+        """
+        # Get suitability for this soil type
+        suitability = SOIL_CROP_SUITABILITY.get(soil_type, {})
+        
+        # Create adjustment factors for each crop
+        adjusted_probs = probabilities.copy()
+        
+        for idx, crop in enumerate(self.crop_classes):
+            crop_lower = crop.lower()
+            
+            # Apply stronger adjustments based on suitability
+            if crop_lower in suitability.get('high', []):
+                # Strongly boost highly suitable crops by 3x
+                adjusted_probs[idx] *= 3.0
+            elif crop_lower in suitability.get('medium', []):
+                # Moderate boost for medium suitability (50%)
+                adjusted_probs[idx] *= 1.5
+            elif crop_lower in suitability.get('low', []):
+                # Heavy penalty for low suitability crops (reduce to 20%)
+                adjusted_probs[idx] *= 0.2
+            else:
+                # Crops not in suitability matrix get neutral adjustment (1.0x)
+                adjusted_probs[idx] *= 1.0
+        
+        # Normalize to ensure probabilities sum to 1
+        adjusted_probs = adjusted_probs / adjusted_probs.sum()
+        
+        return adjusted_probs
     
     def predict_crop(self, air_temp: float, humidity: float, soil_moisture: float, 
                      soil_temp: float, nitrogen: float, phosphorus: float, 
@@ -113,7 +185,7 @@ class CropPredictor:
             phosphorus: Phosphorus content in mg/kg (e.g., 50.0)
             potassium: Potassium content in mg/kg (e.g., 60.0)
             season: Season name - 'kharif', 'rabi', or 'zaid'
-            soil_type: Soil type - 'black_soil', 'red_soil', 'laterite_soil', 'alluvial_soil', or 'saline_soil'
+            soil_type: Soil type - 'black_soil', 'red_soil', 'laterite_soil', 'alluvial_soil', or 'saline_alkaline_soil'
         
         Returns:
             Dictionary containing:
@@ -139,16 +211,24 @@ class CropPredictor:
         
         # Get probabilities
         if hasattr(self.model, 'predict_proba'):
+            # Get raw probabilities from model
             probabilities = self.model.predict_proba(input_scaled)[0]
-            confidence = float(probabilities[prediction])
             
-            # Get top 3 crops
-            top_3_indices = np.argsort(probabilities)[::-1][:3]
+            # Adjust probabilities based on soil-crop suitability
+            adjusted_probabilities = self._adjust_predictions_for_soil(probabilities, soil_type)
+            
+            # Get new prediction from adjusted probabilities
+            adjusted_prediction = np.argmax(adjusted_probabilities)
+            predicted_crop = self.label_encoder.inverse_transform([adjusted_prediction])[0]
+            confidence = float(adjusted_probabilities[adjusted_prediction])
+            
+            # Get top 3 crops from adjusted probabilities
+            top_3_indices = np.argsort(adjusted_probabilities)[::-1][:3]
             top_3_crops = [
                 {
                     'crop': self.label_encoder.inverse_transform([idx])[0],
-                    'probability': float(probabilities[idx]),
-                    'confidence_percent': f"{probabilities[idx]*100:.2f}%"
+                    'probability': float(adjusted_probabilities[idx]),
+                    'confidence_percent': f"{adjusted_probabilities[idx]*100:.2f}%"
                 }
                 for idx in top_3_indices
             ]
