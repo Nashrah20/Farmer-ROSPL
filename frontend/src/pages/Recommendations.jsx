@@ -27,12 +27,12 @@ const ZONE_LABELS = {
 const convertSoilType = (userSoilType) => {
   const soilMap = {
     'black_soil': 'black',
-    'red_soil': 'red',
+    'red_soil': 'yellow-brown', // Red soil maps to yellow-brown category
     'laterite_soil': 'laterite',
     'alluvial_soil': 'alluvial',
-    'saline_alkaline_soil': 'saline'
+    'saline_alkaline_soil': 'coarse' // Saline soil maps to coarse category
   };
-  return soilMap[userSoilType] || 'coarse';
+  return soilMap[userSoilType] || 'black';
 };
 
 const Recommendations = () => {
