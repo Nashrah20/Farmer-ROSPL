@@ -208,31 +208,32 @@ const ModernDashboard = () => {
   const fetchSoilData = async () => {
     try {
       console.log('🌱 Fetching soil data...');
-      const response = await farmAPI.getSoilData(18.975, 72.826);
-      console.log('✅ Soil data received:', response);
       
-      // Check if using backend proxy (response.data.data) or direct API
-      const soilData = response.data || response;
-      const data = soilData.data || soilData;
+      // Direct API call to avoid CORS issues
+      const response = await fetch(
+        `https://api.agromonitoring.com/agro/1.0/soil?lat=19.0760&lon=72.8777&appid=97f32bc1c704c19fbb76c734b0c127b6`
+      );
+      const data = await response.json();
+      
+      console.log('✅ Soil API response:', data);
       
       if (data) {
         const updates = {};
         
-        // Handle backend proxy format (data.moisture directly) or API format (data.moisture in m3/m3)
+        // Soil moisture from API (in decimal, convert to percentage)
         if (data.moisture !== undefined) {
-          // If moisture > 1, it's already a percentage, otherwise convert
-          updates.soilMoisture = data.moisture > 1 ? Math.round(data.moisture) : Math.round(data.moisture * 100);
+          updates.soilMoisture = Math.round(data.moisture * 100);
           console.log('💧 Soil moisture:', updates.soilMoisture, '%');
         }
         
-        // Handle temperature - backend proxy (Celsius) or API (Kelvin)
-        if (data.temperature !== undefined) {
-          // If temp > 100, it's Kelvin, convert to Celsius
-          updates.soilTemperature = data.temperature > 100 ? (data.temperature - 273.15).toFixed(1) : Number(data.temperature).toFixed(1);
-          console.log('🌡️ Soil temperature:', updates.soilTemperature, '°C');
+        // Soil temperature from API (in Kelvin, convert to Celsius)
+        // Use t10 (10cm depth) or t0 (surface)
+        if (data.t10 !== undefined) {
+          updates.soilTemperature = (data.t10 - 273.15).toFixed(1);
+          console.log('🌡️ Soil temperature (10cm):', updates.soilTemperature, '°C');
         } else if (data.t0 !== undefined) {
           updates.soilTemperature = (data.t0 - 273.15).toFixed(1);
-          console.log('🌡️ Soil temperature:', updates.soilTemperature, '°C');
+          console.log('🌡️ Soil temperature (surface):', updates.soilTemperature, '°C');
         }
         
         if (Object.keys(updates).length > 0) {
@@ -241,6 +242,12 @@ const ModernDashboard = () => {
       }
     } catch (error) {
       console.error('❌ Error fetching soil data:', error);
+      // Set fallback values
+      setSensorData(prev => ({ 
+        ...prev, 
+        soilMoisture: prev.soilMoisture || 62,
+        soilTemperature: prev.soilTemperature || '18.8'
+      }));
     }
   };
 
