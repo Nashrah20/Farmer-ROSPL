@@ -171,20 +171,23 @@ const ModernDashboard = () => {
   const fetchWeatherData = async () => {
     try {
       console.log('🌤️ Fetching weather data...');
-      const data = await farmAPI.getWeatherData('mumbai');
-      console.log('✅ Weather data received:', data);
+      const response = await farmAPI.getWeatherData('mumbai');
+      console.log('✅ Weather data received:', response);
       
-      // Update sensor data with real weather values
-      if (data && data.current) {
+      // Check if using backend proxy (response.data) or direct API (response.current)
+      const weatherData = response.data || response;
+      const data = weatherData.data || weatherData.current || weatherData;
+      
+      if (data && (data.temperature !== undefined || data.temp_c !== undefined)) {
         setSensorData(prev => ({
           ...prev,
-          temperature: data.current.temp_c,
-          humidity: data.current.humidity,
-          weatherCondition: data.current.condition.text
+          temperature: data.temperature || data.temp_c,
+          humidity: data.humidity,
+          weatherCondition: data.condition || (data.condition && data.condition.text)
         }));
-        console.log('🌡️ Temperature:', data.current.temp_c, '°C');
-        console.log('💧 Humidity:', data.current.humidity, '%');
-        console.log('🌤️ Condition:', data.current.condition.text);
+        console.log('🌡️ Temperature:', data.temperature || data.temp_c, '°C');
+        console.log('💧 Humidity:', data.humidity, '%');
+        console.log('🌤️ Condition:', data.condition || (data.condition && data.condition.text));
       }
     } catch (error) {
       console.error('❌ Error fetching weather data:', error);
@@ -195,21 +198,29 @@ const ModernDashboard = () => {
   const fetchSoilData = async () => {
     try {
       console.log('🌱 Fetching soil data...');
-      const data = await farmAPI.getSoilData(18.975, 72.826);
-      console.log('✅ Soil data received:', data);
+      const response = await farmAPI.getSoilData(18.975, 72.826);
+      console.log('✅ Soil data received:', response);
       
-      // Update sensor data with real soil values
+      // Check if using backend proxy (response.data.data) or direct API
+      const soilData = response.data || response;
+      const data = soilData.data || soilData;
+      
       if (data) {
         const updates = {};
         
-        // moisture is in m3/m3, convert to percentage
+        // Handle backend proxy format (data.moisture directly) or API format (data.moisture in m3/m3)
         if (data.moisture !== undefined) {
-          updates.soilMoisture = Math.round(data.moisture * 100);
+          // If moisture > 1, it's already a percentage, otherwise convert
+          updates.soilMoisture = data.moisture > 1 ? Math.round(data.moisture) : Math.round(data.moisture * 100);
           console.log('💧 Soil moisture:', updates.soilMoisture, '%');
         }
         
-        // t0 is surface temp in Kelvin, convert to Celsius
-        if (data.t0 !== undefined) {
+        // Handle temperature - backend proxy (Celsius) or API (Kelvin)
+        if (data.temperature !== undefined) {
+          // If temp > 100, it's Kelvin, convert to Celsius
+          updates.soilTemperature = data.temperature > 100 ? (data.temperature - 273.15).toFixed(1) : Number(data.temperature).toFixed(1);
+          console.log('🌡️ Soil temperature:', updates.soilTemperature, '°C');
+        } else if (data.t0 !== undefined) {
           updates.soilTemperature = (data.t0 - 273.15).toFixed(1);
           console.log('🌡️ Soil temperature:', updates.soilTemperature, '°C');
         }
@@ -227,11 +238,14 @@ const ModernDashboard = () => {
   const fetchNPKData = async () => {
     try {
       console.log('🧪 Fetching NPK data...');
-      const data = await farmAPI.getNPKData();
-      console.log('✅ NPK data received:', data);
+      const response = await farmAPI.getNPKData();
+      console.log('✅ NPK data received:', response);
+      
+      // getNPKData already returns the data object directly
+      const data = response || {};
       
       // Update sensor data with NPK values
-      if (data) {
+      if (data && (data.nitrogen !== undefined || data.phosphorus !== undefined || data.potassium !== undefined)) {
         setSensorData(prev => ({
           ...prev,
           nitrogen: data.nitrogen,
