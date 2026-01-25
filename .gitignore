@@ -37,6 +37,11 @@ instance/
 backend/.env
 **/.env
 
+# API Keys and Deployment Guides (Security)
+API_KEYS_DEPLOYMENT_GUIDE.md
+RENDER_QUICK_SETUP.md
+*_DEPLOYMENT_GUIDE.md
+
 # ML Models (optional - uncomment if models are large)
 # backend/ml/model.pkl
 # backend/ml/*.pkl
