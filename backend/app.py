@@ -33,7 +33,13 @@ app = Flask(__name__)
 # Enable CORS with credentials support for authentication
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:3001", "http://localhost:3000", "https://farmer-hackathon-x9m8.onrender.com"],
+        "origins": [
+            "http://localhost:3001", 
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "https://farmer-hackathon-x9m8.onrender.com",
+            "https://farmai-dashboard.netlify.app"
+        ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True
