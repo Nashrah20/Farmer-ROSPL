@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
  */
 
 const ModernDashboard = () => {
-  const { t, language } = useLanguage();
+  const { t, language, cycleLanguage } = useLanguage();
   const { user } = useAuth();
   
   const [predictions, setPredictions] = useState(null);
@@ -364,7 +364,7 @@ const ModernDashboard = () => {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 pt-16 lg:pt-0">
-      {/* Farmer-friendly Background Pattern */}
+      {/* Farmer-friendly Background Pattern */
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-10">
         <div className="absolute top-0 left-0 w-full h-full" style={{
           backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(120, 80, 40, 0.1) 35px, rgba(120, 80, 40, 0.1) 70px)`
@@ -399,158 +399,15 @@ const ModernDashboard = () => {
           </div>
         </div>
 
-        {/* Single Sensor Readings */}
-        <div className="mb-6">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 text-amber-900">
-            {language === 'hi' ? 'वर्तमान सेंसर रीडिंग' : language === 'mr' ? 'सध्याचे सेन्सर वाचन' : 'Current Sensor Readings'}
-          </h2>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {/* Temperature */}
-            <div className="group relative bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all">
-              <div className="flex items-start justify-between mb-3">
-                <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-amber-700" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-              <p className="text-sm font-semibold text-amber-800 mb-1">
-                {language === 'hi' ? 'तापमान' : language === 'mr' ? 'तापमान' : 'Temperature'}
-              </p>
-              <p className="text-3xl font-bold text-amber-900">
-                {sensorData.temperature ? formatNumber(sensorData.temperature, 1) : '--'}°C
-              </p>
-              {sensorData.weatherCondition && (
-                <p className="text-xs text-amber-600 mt-1">{sensorData.weatherCondition}</p>
-              )}
-            </div>
-
-            {/* Humidity */}
-            <div className="group relative bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all">
-              <div className="flex items-start justify-between mb-3">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-blue-700" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v9A2.5 2.5 0 005.5 17h9a2.5 2.5 0 002.5-2.5v-9A2.5 2.5 0 0014.5 3h-9zM5 5.5A.5.5 0 015.5 5h9a.5.5 0 01.5.5v9a.5.5 0 01-.5.5h-9a.5.5 0 01-.5-.5v-9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-              <p className="text-sm font-semibold text-blue-800 mb-1">
-                {language === 'hi' ? 'नमी' : language === 'mr' ? 'आर्द्रता' : 'Humidity'}
-              </p>
-              <p className="text-3xl font-bold text-blue-900">
-                {sensorData.humidity ? formatNumber(sensorData.humidity, 0) : '--'}%
-              </p>
-              {sensorData.humidity && (
-                <div className="mt-3 h-2 bg-blue-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-blue-600 rounded-full transition-all duration-1000"
-                    style={{ width: `${sensorData.humidity}%` }}
-                  ></div>
-                </div>
-              )}
-            </div>
-
-            {/* Soil Moisture */}
-            <div className="group relative bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all">
-              <div className="flex items-start justify-between mb-3">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-green-700" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
-                  </svg>
-                </div>
-              </div>
-              <p className="text-sm font-semibold text-green-800 mb-1">
-                {language === 'hi' ? 'मिट्टी की नमी' : language === 'mr' ? 'मातीची ओलावा' : 'Soil Moisture'}
-              </p>
-              <p className="text-3xl font-bold text-green-900">
-                {sensorData.soilMoisture ? formatNumber(sensorData.soilMoisture, 0) : '--'}%
-              </p>
-            </div>
-
-            {/* Soil Temperature */}
-            <div className="group relative bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all">
-              <div className="flex items-start justify-between mb-3">
-                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <svg className="w-6 h-6 text-orange-700" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-              <p className="text-sm font-semibold text-orange-800 mb-1">
-                {language === 'hi' ? 'मिट्टी का तापमान' : language === 'mr' ? 'मातीचे तापमान' : 'Soil Temp'}
-              </p>
-              <p className="text-3xl font-bold text-orange-900">
-                {sensorData.soilTemperature ? formatNumber(sensorData.soilTemperature, 1) : '--'}°C
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* NPK Nutrients */}
-        <div className="mb-8">
-          <h3 className="text-2xl font-bold text-amber-900 mb-4 flex items-center justify-center gap-2">
-            <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-            </svg>
-            {language === 'hi' ? 'मिट्टी पोषक तत्व (NPK)' : language === 'mr' ? 'माती पोषक तत्वे (NPK)' : 'Soil Nutrients (NPK)'}
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md hover:shadow-lg transform hover:scale-105 transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <span className="text-xl font-bold text-purple-700">N</span>
-                </div>
-                <span className="text-xs font-semibold text-purple-700 bg-purple-100 px-3 py-1 rounded-full">
-                  {language === 'hi' ? 'नाइट्रोजन' : language === 'mr' ? 'नायट्रोजन' : 'Nitrogen'}
-                </span>
-              </div>
-              <p className="text-3xl font-bold text-purple-900">
-                {sensorData.nitrogen ? formatNumber(sensorData.nitrogen, 2) : '--'}
-              </p>
-              <p className="text-xs text-purple-600 mt-1">mg/kg</p>
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md hover:shadow-lg transform hover:scale-105 transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <span className="text-xl font-bold text-orange-700">P</span>
-                </div>
-                <span className="text-xs font-semibold text-orange-700 bg-orange-100 px-3 py-1 rounded-full">
-                  {language === 'hi' ? 'फॉस्फोरस' : language === 'mr' ? 'फॉस्फरस' : 'Phosphorus'}
-                </span>
-              </div>
-              <p className="text-3xl font-bold text-orange-900">
-                {sensorData.phosphorus ? formatNumber(sensorData.phosphorus, 2) : '--'}
-              </p>
-              <p className="text-xs text-orange-600 mt-1">mg/kg</p>
-            </div>
-
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-amber-200 shadow-md hover:shadow-lg transform hover:scale-105 transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
-                  <span className="text-xl font-bold text-pink-700">K</span>
-                </div>
-                <span className="text-xs font-semibold text-pink-700 bg-pink-100 px-3 py-1 rounded-full">
-                  {language === 'hi' ? 'पोटेशियम' : language === 'mr' ? 'पोटॅशियम' : 'Potassium'}
-                </span>
-              </div>
-              <p className="text-3xl font-bold text-pink-900">
-                {sensorData.potassium ? formatNumber(sensorData.potassium, 2) : '--'}
-              </p>
-              <p className="text-xs text-pink-600 mt-1">mg/kg</p>
-            </div>
-          </div>
-        </div>
-
         {/* AI Recommendations Button */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={getRecommendations}
                   disabled={loading}
-                  className="group relative px-8 py-4 bg-gradient-to-r from-amber-600 to-amber-700 text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group relative px-10 py-5 bg-gradient-to-r from-amber-600 via-amber-500 to-orange-600 text-white text-lg font-bold rounded-2xl shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
                 >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                   <span className="relative z-10 flex items-center gap-2">
                     {loading ? (
                       <>
@@ -588,15 +445,17 @@ const ModernDashboard = () => {
         {predictions && predictions.crop && (
               <>
                 {/* Soil Type Display */}
-                <div className="mb-6 max-w-md mx-auto">
-                  <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl p-6 shadow-xl border-2 border-amber-200">
-                    <div className="flex items-center justify-center gap-3">
-                      <span className="text-3xl">🏜️</span>
+                <div className="mb-8 max-w-lg mx-auto">
+                  <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 rounded-3xl p-8 shadow-2xl border-2 border-amber-300/50">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-300/10 rounded-full -mr-16 -mt-16"></div>
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-orange-300/10 rounded-full -ml-12 -mb-12"></div>
+                    <div className="relative flex items-center justify-center gap-4">
+                      <div className="text-5xl animate-pulse">🏜️</div>
                       <div className="text-center">
-                        <p className="text-sm font-semibold text-amber-700 mb-1">
+                        <p className="text-sm font-bold text-amber-700/80 mb-2 uppercase tracking-wider">
                           {language === 'hi' ? 'मिट्टी का प्रकार' : language === 'mr' ? 'मातीचा प्रकार' : 'Soil Type'}
                         </p>
-                        <p className="text-2xl font-black text-amber-900 uppercase">
+                        <p className="text-3xl font-black text-amber-900 uppercase tracking-wide">
                           {sensorData.soilType ? sensorData.soilType.replace(/_/g, ' ') : 'Black Soil'}
                         </p>
                       </div>
@@ -605,27 +464,29 @@ const ModernDashboard = () => {
                 </div>
 
                 {/* Crop Recommendation Banner */}
-                <div className="mb-6 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-2xl">
-                  <div className="flex items-center justify-between flex-wrap gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                        <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <div className="mb-8 relative overflow-hidden bg-gradient-to-br from-green-500 via-emerald-600 to-green-700 rounded-3xl p-8 text-white shadow-2xl">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/5 rounded-full -ml-24 -mb-24"></div>
+                  <div className="relative flex items-center justify-between flex-wrap gap-6">
+                    <div className="flex items-center gap-5">
+                      <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md shadow-lg">
+                        <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clipRule="evenodd" />
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-2xl font-bold">
+                        <h3 className="text-3xl font-black mb-1">
                           {language === 'hi' ? '🌾 अनुशंसित फसल' : language === 'mr' ? '🌾 शिफारस केलेले पीक' : '🌾 Recommended Crop'}
                         </h3>
-                        <p className="text-white/90 text-sm mt-1">
+                        <p className="text-white/95 text-base font-semibold">
                           {language === 'hi' ? `मौसम: ${predictions.season}` : language === 'mr' ? `हंगाम: ${predictions.season}` : `Season: ${predictions.season}`}
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-4xl font-black uppercase tracking-wider">{predictions.crop}</div>
-                      <div className="text-white/90 text-sm mt-1">
-                        {language === 'hi' ? 'विश्वास:' : language === 'mr' ? 'विश्वास:' : 'Confidence:'} <span className="font-bold">{predictions.confidence_percent}</span>
+                    <div className="text-right bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-4">
+                      <div className="text-5xl font-black uppercase tracking-wider mb-2">{predictions.crop}</div>
+                      <div className="text-white/95 text-base">
+                        {language === 'hi' ? 'विश्वास:' : language === 'mr' ? 'विश्वास:' : 'Confidence:'} <span className="font-black text-lg">{predictions.confidence_percent}</span>
                       </div>
                     </div>
                   </div>

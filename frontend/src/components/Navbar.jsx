@@ -30,34 +30,38 @@ const Navbar = () => {
   return (
     <>
       {/* Top Bar - Only for mobile and sidebar toggle */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-amber-700 via-yellow-700 to-amber-800 text-white shadow-lg z-50 flex items-center justify-between px-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-2 shadow-lg">
-            <img src="/pwa-192x192.png" alt="FarmAI" className="w-full h-full object-cover" />
-          </div>
-          <span className="text-xl font-bold">FarmAI</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={cycleLanguage}
-            className="p-2 rounded-lg hover:bg-white/10 transition-all"
-            title="Change Language"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-            </svg>
-          </button>
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-amber-700 via-yellow-700 to-amber-800 text-white shadow-lg z-50 flex items-center justify-between px-3">
+        <div className="flex items-center space-x-2">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-white/10 transition-all"
+            className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all border border-white/20 flex-shrink-0"
+            aria-label="Menu"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
               {mobileMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               )}
             </svg>
+          </button>
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center p-1.5 shadow-lg flex-shrink-0">
+            <img src="/pwa-192x192.png" alt="FarmAI" className="w-full h-full object-cover" />
+          </div>
+          <span className="text-lg font-bold">FarmAI</span>
+        </div>
+        <div className="flex items-center">
+          <button
+            onClick={cycleLanguage}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-lg hover:bg-white/20 transition-all border border-white/20"
+            title="Change Language"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+            </svg>
+            <span className="text-xs font-semibold uppercase">
+              {language === 'hi' ? 'हिं' : language === 'mr' ? 'मर' : 'EN'}
+            </span>
           </button>
         </div>
       </div>
@@ -207,31 +211,31 @@ const Navbar = () => {
 
             {/* Bottom Section */}
             <div className="p-4 border-t border-white/10 space-y-3">
-              {/* Language Button */}
-              <button
-                onClick={cycleLanguage}
-                className="flex items-center space-x-3 px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-lg transition-all w-full"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                </svg>
-                <div className="flex-1 text-left">
-                  <span className="font-medium text-sm block">{getNextLanguageName()}</span>
-                  <span className="text-xs text-amber-100 opacity-75">{language.toUpperCase()}</span>
-                </div>
-              </button>
-
+              {/* User Profile */}
               <div className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white to-amber-50 text-amber-800 flex items-center justify-center font-bold shadow-lg">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-white to-amber-50 text-amber-800 flex items-center justify-center font-bold shadow-lg ring-2 ring-white/20">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold">{t.nav.farmerDashboard}</p>
+                  <p className="text-sm font-semibold">{user?.username || t.nav.farmerDashboard}</p>
                   <p className="text-xs text-amber-100 opacity-80">{t.nav.welcomeBack}</p>
                 </div>
               </div>
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 bg-red-500/20 hover:bg-red-500/30 text-red-200 hover:text-red-100 w-full"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span className="font-medium text-sm">
+                  {language === 'hi' ? 'लॉगआउट' : language === 'mr' ? 'लॉगआउट' : 'Logout'}
+                </span>
+              </button>
             </div>
           </aside>
         </>
