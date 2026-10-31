@@ -58,7 +58,7 @@ const Sensors = () => {
       
       // Fetch NPK and soil type
       try {
-        const npkRes = await fetch('https://npk-agriculture-api.onrender.com/api/npk/latest');
+        const npkRes = await fetch('https://npk-agriculture-api.onrender.com/api/npk/latest', { signal: AbortSignal.timeout(8000) });
         const npkData = await npkRes.json();
         console.log('NPK full response:', JSON.stringify(npkData, null, 2));
         

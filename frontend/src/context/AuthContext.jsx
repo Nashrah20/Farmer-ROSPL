@@ -1,24 +1,22 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // Load user from localStorage on mount
-  useEffect(() => {
+  // Load user from localStorage synchronously so protected routes don't
+  // redirect to /login on the first render after a page refresh
+  const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem('farmAI_user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-        localStorage.removeItem('farmAI_user');
-      }
+    if (!storedUser) return null;
+    try {
+      return JSON.parse(storedUser);
+    } catch (error) {
+      console.error('Error parsing stored user:', error);
+      localStorage.removeItem('farmAI_user');
+      return null;
     }
-    setLoading(false);
-  }, []);
+  });
+  const loading = false;
 
   const login = (userData) => {
     setUser(userData);

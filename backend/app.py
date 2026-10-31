@@ -62,6 +62,13 @@ advanced_predictor = AdvancedPredictor(Config.ML_MODEL_PATH, Config.ML_FEATURES_
 resource_tracker = ResourceTracker(mongo_client)
 user_service = UserService(mongo_client)
 
+# Seed demo accounts (demo/demo123, farmer/farmer123)
+try:
+    user_service.ensure_demo_users()
+    print("✅ Demo users ready")
+except Exception as e:
+    print(f"⚠️  Warning: Could not create demo users: {e}")
+
 # Initialize Crop Predictor (new ML model)
 try:
     crop_predictor = CropPredictor()

@@ -225,7 +225,7 @@ const Recommendations = () => {
       
       // Fetch NPK and soil type from external API
       try {
-        const npkRes = await fetch('https://npk-agriculture-api.onrender.com/api/npk/latest');
+        const npkRes = await fetch('https://npk-agriculture-api.onrender.com/api/npk/latest', { signal: AbortSignal.timeout(8000) });
         const npkData = await npkRes.json();
         console.log('🧪 NPK API full response:', JSON.stringify(npkData, null, 2));
         

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import config from '../config';
 
 const ImageAnalysis = () => {
   const { t, language } = useLanguage();
@@ -341,7 +342,7 @@ const ImageAnalysis = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
-      const response = await fetch('http://localhost:5000/api/image/analyze', {
+      const response = await fetch(`${config.apiUrl}/api/image/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -362,7 +363,7 @@ const ImageAnalysis = () => {
       
       console.log('API Response:', data);
       
-      if (data.success && data.analysis) {
+      if (data.success && data.analysis && data.analysis.success !== false) {
         setResult(data.analysis);
         // Speak the analysis result
         const speechText = generateSpeechText(data.analysis);
@@ -376,7 +377,7 @@ const ImageAnalysis = () => {
       if (err.name === 'AbortError') {
         setError('Request timed out. Please try again with a smaller image.');
       } else if (err.message.includes('Failed to fetch')) {
-        setError('Cannot connect to server. Please ensure the backend is running on http://localhost:5000');
+        setError(`Cannot connect to server. Please ensure the backend is running on ${config.apiUrl}`);
       } else {
         setError('Failed to analyze image: ' + err.message);
       }

@@ -126,7 +126,8 @@ export const farmAPI = {
       // Fallback to direct API if proxy fails
       try {
         const response = await fetch(
-          `https://npk-agriculture-api.onrender.com/api/npk/latest`
+          `https://npk-agriculture-api.onrender.com/api/npk/latest`,
+          { signal: AbortSignal.timeout(8000) }
         );
         const result = await response.json();
         return result.data;

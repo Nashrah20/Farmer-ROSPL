@@ -364,7 +364,7 @@ const ModernDashboard = () => {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 pt-16 lg:pt-0">
-      {/* Farmer-friendly Background Pattern */
+      {/* Farmer-friendly Background Pattern */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-10">
         <div className="absolute top-0 left-0 w-full h-full" style={{
           backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(120, 80, 40, 0.1) 35px, rgba(120, 80, 40, 0.1) 70px)`

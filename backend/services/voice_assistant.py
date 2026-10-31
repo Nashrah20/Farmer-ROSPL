@@ -51,6 +51,7 @@ class VoiceAssistant:
         Process voice command and return appropriate response
         """
         text = text.lower().strip()
+        responses = self.responses.get(language, self.responses['en'])
         
         # Check if zone is required but not provided
         commands_needing_zone = ['get_recommendation', 'check_disease', 'check_yield']
@@ -61,7 +62,7 @@ class VoiceAssistant:
         if command_type in commands_needing_zone and not zone_id:
             return {
                 'success': False,
-                'message': self.responses[language]['zone_required'],
+                'message': responses['zone_required'],
                 'requires_zone': True
             }
         
@@ -99,7 +100,7 @@ class VoiceAssistant:
         
         else:
             response['success'] = False
-            response['message'] = self.responses[language]['unknown_command']
+            response['message'] = responses['unknown_command']
         
         return response
     

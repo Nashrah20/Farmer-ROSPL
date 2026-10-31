@@ -36,7 +36,7 @@ const Login = () => {
       
       if (response.data.success) {
         login(response.data.user);
-        navigate('/dashboard');
+        navigate('/');
       } else {
         setError(response.data.error || 'Login failed');
       }
@@ -114,6 +114,29 @@ const Login = () => {
                 )}
               </button>
             </div>
+          </div>
+
+          <div className="rounded-md bg-green-50 border border-green-200 p-3 text-sm text-gray-700">
+            <p className="font-medium text-green-800 mb-1">
+              {language === 'hi' ? 'डेमो खाते' : language === 'mr' ? 'डेमो खाती' : 'Demo accounts'}
+            </p>
+            {[
+              { username: 'demo', password: 'demo123' },
+              { username: 'farmer', password: 'farmer123' }
+            ].map((demo) => (
+              <div key={demo.username} className="flex items-center justify-between py-0.5">
+                <span>
+                  <code>{demo.username}</code> / <code>{demo.password}</code>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => { setFormData(demo); setError(''); }}
+                  className="text-green-600 hover:text-green-500 font-medium"
+                >
+                  {language === 'hi' ? 'भरें' : language === 'mr' ? 'भरा' : 'Use'}
+                </button>
+              </div>
+            ))}
           </div>
 
           {error && (

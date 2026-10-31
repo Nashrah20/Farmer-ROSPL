@@ -4,6 +4,12 @@ User Service for MongoDB operations
 from datetime import datetime
 from models.user import User
 
+# Demo accounts created automatically on startup (for local testing / demos)
+DEMO_USERS = [
+    {'username': 'demo', 'password': 'demo123', 'soil_type': 'black_soil'},
+    {'username': 'farmer', 'password': 'farmer123', 'soil_type': 'red_soil'},
+]
+
 class UserService:
     """Service for user-related database operations"""
     
@@ -33,6 +39,12 @@ class UserService:
         
         return user_data, None
     
+    def ensure_demo_users(self):
+        """Create the demo accounts if they don't exist yet"""
+        for demo in DEMO_USERS:
+            if not self.users_collection.find_one({'username': demo['username']}):
+                self.create_user(demo['username'], demo['password'], demo['soil_type'])
+
     def authenticate_user(self, username, password):
         """Authenticate a user"""
         user = self.users_collection.find_one({'username': username})

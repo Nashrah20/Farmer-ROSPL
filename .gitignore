@@ -90,3 +90,5 @@ htmlcov/
 # Backup files
 *.bak
 *.backup
+
+.mongo-data/
